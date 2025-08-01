@@ -113,6 +113,11 @@ export function handleFactoryGridClick(index: number) {
 }
 
 export function handleWorldGridClick(index: number) {
+  // Block all world interactions during combat
+  if (gameState.combat.active) {
+    return;
+  }
+  
   const chunk = gameActions.getChunk(gameState.world.playerX, gameState.world.playerY);
   const tile = chunk.tiles[index];
   

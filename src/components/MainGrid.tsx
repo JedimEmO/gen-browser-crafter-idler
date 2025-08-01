@@ -31,17 +31,34 @@ const WorldGrid: Component = () => {
     return gameState.world.playerLocalY * 10 + gameState.world.playerLocalX;
   };
   
+  const getEnemyAtPosition = (x: number, y: number) => {
+    const currentChunk = chunk();
+    return currentChunk.enemies.find(e => e.localX === x && e.localY === y);
+  };
+  
   return (
     <For each={chunk().tiles}>
       {(tile, index) => {
+        const x = () => index() % 10;
+        const y = () => Math.floor(index() / 10);
         const isPlayerPosition = () => index() === getPlayerIndex();
+        const enemy = () => getEnemyAtPosition(x(), y());
         
         const isWithinReach = () => {
-          const x = index() % 10;
-          const y = Math.floor(index() / 10);
-          const dx = Math.abs(x - gameState.world.playerLocalX);
-          const dy = Math.abs(y - gameState.world.playerLocalY);
-          return dx <= 1 && dy <= 1 && !isPlayerPosition();
+          if (isPlayerPosition()) return false;
+          
+          const playerX = gameState.world.playerLocalX;
+          const playerY = gameState.world.playerLocalY;
+          const tileX = x();
+          const tileY = y();
+          
+          // Calculate actual distance without wrapping
+          const dx = tileX - playerX;
+          const dy = tileY - playerY;
+          
+          // Only highlight tiles that are exactly 1 tile away (including diagonals)
+          // This creates a 3x3 grid with player in center
+          return Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
         };
         
         return (
@@ -53,12 +70,21 @@ const WorldGrid: Component = () => {
               "position": "relative"
             }}
             data-index={index()}
+            title={`x:${x()} y:${y()} player:${gameState.world.playerLocalX},${gameState.world.playerLocalY} reach:${isWithinReach()}`}
             onClick={() => handleWorldGridClick(index())}
           >
-            <Show when={tile} fallback={<span class="text-gray-700 text-xs">·</span>}>
+            <Show when={enemy()}>
+              <div class="w-full h-full p-1">
+                {iconLibrary[enemy()!.type]()}
+              </div>
+            </Show>
+            <Show when={!enemy() && tile}>
               <div class="w-full h-full p-1">
                 {iconLibrary[tile!.type] ? iconLibrary[tile!.type]() : '?'}
               </div>
+            </Show>
+            <Show when={!enemy() && !tile}>
+              <span class="text-gray-700 text-xs">·</span>
             </Show>
             <Show when={isPlayerPosition()}>
               <div style={{
@@ -90,6 +116,7 @@ export const MainGrid: Component = () => {
     // Handle keyboard movement for explore view
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameState.currentView !== 'explore') return;
+      if (gameState.combat.active) return; // Block movement during combat
       
       switch(e.key) {
         case 'ArrowUp':

@@ -1,5 +1,5 @@
 import { createStore } from 'solid-js/store';
-import type { GameState, Machine, WorldTile, Chunk, View, InventorySlot } from '../types';
+import type { GameState, Machine, WorldTile, Chunk, View, InventorySlot, Enemy } from '../types';
 import { itemData } from '../data/items';
 import { biomes, worldResourceData } from '../data/biomes';
 import { recipes } from '../data/recipes';
@@ -32,6 +32,14 @@ const initialState: GameState = {
     playerY: 0,
     playerLocalX: 5,
     playerLocalY: 5,
+  },
+  combat: {
+    active: false,
+    enemy: null,
+    playerHp: 100,
+    playerMaxHp: 100,
+    turn: 'player',
+    log: [],
   },
 };
 
@@ -207,6 +215,11 @@ export const gameActions = {
     }
   },
   
+  movePlayerToChunk: (chunkX: number, chunkY: number) => {
+    setGameState('world', 'playerX', chunkX);
+    setGameState('world', 'playerY', chunkY);
+  },
+  
   getChunk: (chunkX: number, chunkY: number): Chunk => {
     const key = `${chunkX},${chunkY}`;
     if (!gameState.world.chunks[key]) {
@@ -271,14 +284,67 @@ export const gameActions = {
     }
     
     return true;
+  },
+  
+  // Combat actions
+  startCombat: (enemy: Enemy) => {
+    setGameState('combat', 'active', true);
+    setGameState('combat', 'enemy', enemy);
+    setGameState('combat', 'turn', 'player');
+    setGameState('combat', 'log', ['A wild ' + enemy.type + ' appears!']);
+  },
+  
+  endCombat: () => {
+    setGameState('combat', 'active', false);
+    setGameState('combat', 'enemy', null);
+    setGameState('combat', 'log', []);
+  },
+  
+  addCombatLog: (message: string) => {
+    setGameState('combat', 'log', (log) => [...log, message]);
+  },
+  
+  setTurn: (turn: 'player' | 'enemy') => {
+    setGameState('combat', 'turn', turn);
+  },
+  
+  damagePlayer: (damage: number) => {
+    setGameState('combat', 'playerHp', (hp) => Math.max(0, hp - damage));
+  },
+  
+  damageEnemy: (damage: number) => {
+    setGameState('combat', 'enemy', 'hp', (hp) => Math.max(0, hp - damage));
+  },
+  
+  removeEnemy: (chunkKey: string, enemyId: string) => {
+    const chunk = gameState.world.chunks[chunkKey];
+    if (chunk) {
+      setGameState('world', 'chunks', chunkKey, 'enemies', (enemies) => 
+        enemies.filter(e => e.id !== enemyId)
+      );
+    }
+  },
+  
+  updateChunkEnemy: (chunkKey: string, enemyIndex: number, updates: Partial<Enemy>) => {
+    setGameState('world', 'chunks', chunkKey, 'enemies', enemyIndex, (enemy) => ({
+      ...enemy,
+      ...updates
+    }));
   }
 };
 
 // Helper functions
+const enemyStats = {
+  slime: { hp: 20, damage: 5 },
+  goblin: { hp: 30, damage: 8 },
+  wolf: { hp: 40, damage: 12 }
+};
+
 function generateChunk(chunkX: number, chunkY: number, seed: number): Chunk {
   const chunk: Chunk = {
     tiles: Array(100).fill(null),
-    biome: getBiome(chunkX, chunkY, seed)
+    biome: getBiome(chunkX, chunkY, seed),
+    enemies: []
   };
   
   const biomeInfo = biomes[chunk.biome];
@@ -296,13 +362,37 @@ function generateChunk(chunkX: number, chunkY: number, seed: number): Chunk {
     }
   }
   
+  // Generate enemies (spawn 1-3 per chunk)
+  const enemyCount = Math.floor(Math.random() * 3) + 1;
+  const enemyTypes: Array<'slime' | 'goblin' | 'wolf'> = ['slime', 'goblin', 'wolf'];
+  
+  for (let i = 0; i < enemyCount; i++) {
+    const enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+    const localX = Math.floor(Math.random() * 10);
+    const localY = Math.floor(Math.random() * 10);
+    
+    // Don't spawn enemy on a resource tile or at player spawn
+    if (!chunk.tiles[localY * 10 + localX] && !(localX === 5 && localY === 5)) {
+      chunk.enemies.push({
+        id: `${chunkX},${chunkY}-${Date.now()}-${i}`,
+        type: enemyType,
+        localX,
+        localY,
+        hp: enemyStats[enemyType].hp,
+        maxHp: enemyStats[enemyType].hp,
+        damage: enemyStats[enemyType].damage,
+        moveCooldown: 0
+      });
+    }
+  }
+  
   return chunk;
 }
 
 function getBiome(x: number, y: number, seed: number): string {
   // Simple noise function for biome generation
   const noise = (x: number, y: number) => {
-    const n = Math.sin(x * 0.1 + seed) * Math.cos(y * 0.1 + seed);
+    const n = Math.sin(x * 0.3 + seed) * Math.cos(y * 0.3 + seed);
     return (n + 1) / 2; // Normalize to 0-1
   };
   

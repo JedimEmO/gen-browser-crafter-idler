@@ -5,6 +5,7 @@ import { MinecraftInventory } from './components/MinecraftInventory';
 import { MainGrid } from './components/MainGrid';
 import { RecipeBook } from './components/RecipeBook';
 import { MachineDetails } from './components/MachineDetails';
+import { CombatModal } from './components/CombatModal';
 import { startGameLoop } from './systems/gameLoop';
 import { messageActions } from './stores/messageStore';
 import { gameState } from './stores/gameStore';
@@ -27,6 +28,7 @@ const App: Component = () => {
       <div class="tooltip" id="tooltip"></div>
       <DragGhost />
       <CursorItem />
+      <CombatModal />
       
       {/* Header */}
       <header class="border-b border-gray-800 bg-black/50 backdrop-blur-sm">

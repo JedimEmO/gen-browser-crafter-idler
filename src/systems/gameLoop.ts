@@ -1,7 +1,7 @@
 import { gameState, gameActions } from '../stores/gameStore';
 import { itemData } from '../data/items';
 import { smeltingRecipes, cokeOvenRecipes } from '../data/recipes';
-import type { Furnace, CokeOven, Chest, Machine, Direction } from '../types';
+import type { Furnace, CokeOven, Chest, Machine, Direction, Enemy } from '../types';
 
 function getTileIndexInDirection(index: number, direction: Direction): number {
   if (!direction) return -1;
@@ -256,6 +256,57 @@ function runCokeOven(cokeOven: CokeOven, index: number) {
   }
 }
 
+function processEnemyMovement() {
+  // Only process enemies if in explore mode and not in combat
+  if (gameState.currentView !== 'explore' || gameState.combat.active) return;
+  
+  const chunkKey = `${gameState.world.playerX},${gameState.world.playerY}`;
+  const chunk = gameState.world.chunks[chunkKey];
+  if (!chunk || !chunk.enemies) return;
+  
+  chunk.enemies.forEach((enemy, index) => {
+    // Decrease movement cooldown
+    if (enemy.moveCooldown > 0) {
+      gameActions.updateChunkEnemy(chunkKey, index, { moveCooldown: enemy.moveCooldown - 1 });
+      return;
+    }
+    
+    // Calculate direction to player
+    const dx = gameState.world.playerLocalX - enemy.localX;
+    const dy = gameState.world.playerLocalY - enemy.localY;
+    
+    // Check if enemy is at player position (start combat)
+    if (dx === 0 && dy === 0) {
+      gameActions.startCombat(enemy);
+      return;
+    }
+    
+    // Move towards player
+    let newX = enemy.localX;
+    let newY = enemy.localY;
+    
+    if (Math.abs(dx) > Math.abs(dy)) {
+      newX += dx > 0 ? 1 : -1;
+    } else if (dy !== 0) {
+      newY += dy > 0 ? 1 : -1;
+    }
+    
+    // Check if new position is valid (not occupied by tile or other enemy)
+    const newIndex = newY * 10 + newX;
+    const isValidMove = newX >= 0 && newX < 10 && newY >= 0 && newY < 10 &&
+      !chunk.tiles[newIndex] &&
+      !chunk.enemies.some((e, i) => i !== index && e.localX === newX && e.localY === newY);
+    
+    if (isValidMove) {
+      gameActions.updateChunkEnemy(chunkKey, index, {
+        localX: newX,
+        localY: newY,
+        moveCooldown: 2 // 2 second cooldown between moves
+      });
+    }
+  });
+}
+
 export function startGameLoop() {
   setInterval(() => {
     // Process all machines in factory
@@ -268,5 +319,8 @@ export function startGameLoop() {
         }
       }
     });
+    
+    // Process enemy movement
+    processEnemyMovement();
   }, 1000);
 }

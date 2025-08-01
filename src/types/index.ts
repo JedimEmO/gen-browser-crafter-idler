@@ -74,9 +74,30 @@ export type WorldTile = {
   hp: number;
 }
 
+export type Enemy = {
+  id: string;
+  type: 'slime' | 'goblin' | 'wolf';
+  localX: number;
+  localY: number;
+  hp: number;
+  maxHp: number;
+  damage: number;
+  moveCooldown: number;
+}
+
+export type CombatState = {
+  active: boolean;
+  enemy: Enemy | null;
+  playerHp: number;
+  playerMaxHp: number;
+  turn: 'player' | 'enemy';
+  log: string[];
+}
+
 export type Chunk = {
   tiles: (WorldTile | null)[];
   biome: string;
+  enemies: Enemy[];
 }
 
 export type BiomeData = {
@@ -118,4 +139,5 @@ export type GameState = {
     playerLocalX: number; // Position within chunk (0-9)
     playerLocalY: number; // Position within chunk (0-9)
   };
+  combat: CombatState;
 }

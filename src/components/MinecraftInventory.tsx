@@ -20,6 +20,7 @@ interface SlotProps {
 const InventorySlotComponent: Component<SlotProps> = (props) => {
   const handleMouseDown = (e: MouseEvent) => {
     e.preventDefault();
+    if (gameState.combat.active) return; // Block dragging during combat
     props.onMouseDown?.(e);
   };
 
