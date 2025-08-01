@@ -30,6 +30,8 @@ const initialState: GameState = {
     chunks: {},
     playerX: 0,
     playerY: 0,
+    playerLocalX: 5,
+    playerLocalY: 5,
   },
 };
 
@@ -177,6 +179,32 @@ export const gameActions = {
     setGameState('world', 'playerX', (x) => x + dx);
     setGameState('world', 'playerY', (y) => y + dy);
     setGameState('selectedGridIndex', null);
+  },
+  
+  movePlayer: (dx: number, dy: number) => {
+    const newLocalX = gameState.world.playerLocalX + dx;
+    const newLocalY = gameState.world.playerLocalY + dy;
+    
+    // Check for chunk boundary crossing
+    if (newLocalX < 0) {
+      setGameState('world', 'playerX', (x) => x - 1);
+      setGameState('world', 'playerLocalX', 9);
+    } else if (newLocalX > 9) {
+      setGameState('world', 'playerX', (x) => x + 1);
+      setGameState('world', 'playerLocalX', 0);
+    } else {
+      setGameState('world', 'playerLocalX', newLocalX);
+    }
+    
+    if (newLocalY < 0) {
+      setGameState('world', 'playerY', (y) => y - 1);
+      setGameState('world', 'playerLocalY', 9);
+    } else if (newLocalY > 9) {
+      setGameState('world', 'playerY', (y) => y + 1);
+      setGameState('world', 'playerLocalY', 0);
+    } else {
+      setGameState('world', 'playerLocalY', newLocalY);
+    }
   },
   
   getChunk: (chunkX: number, chunkY: number): Chunk => {

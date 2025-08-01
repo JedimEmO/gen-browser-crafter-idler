@@ -1,4 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, onMount, Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { MessageLog } from './components/MessageLog';
 import { MinecraftInventory } from './components/MinecraftInventory';
@@ -7,6 +7,7 @@ import { RecipeBook } from './components/RecipeBook';
 import { MachineDetails } from './components/MachineDetails';
 import { startGameLoop } from './systems/gameLoop';
 import { messageActions } from './stores/messageStore';
+import { gameState } from './stores/gameStore';
 import DevMenu from './components/DevMenu';
 import DragGhost from './components/DragGhost';
 import { CursorItem } from './components/CursorItem';

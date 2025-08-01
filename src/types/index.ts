@@ -115,5 +115,7 @@ export type GameState = {
     chunks: Record<string, Chunk>;
     playerX: number;
     playerY: number;
+    playerLocalX: number; // Position within chunk (0-9)
+    playerLocalY: number; // Position within chunk (0-9)
   };
 }

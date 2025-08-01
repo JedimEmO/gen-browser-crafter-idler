@@ -160,3 +160,20 @@ export const iconLibrary: Record<string, IconComponent> = {
     </svg>
   ),
 };
+
+export const PlayerIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Head */}
+    <circle cx="12" cy="8" r="3" fill="#FFD93D" stroke="#000" stroke-width="0.5"/>
+    {/* Body */}
+    <path d="M9 11 L9 16 L11 16 L11 20 L13 20 L13 16 L15 16 L15 11 Z" fill="#4A90E2" stroke="#000" stroke-width="0.5"/>
+    {/* Arms */}
+    <rect x="6" y="12" width="3" height="1.5" fill="#FFD93D" rx="0.5"/>
+    <rect x="15" y="12" width="3" height="1.5" fill="#FFD93D" rx="0.5"/>
+    {/* Eyes */}
+    <circle cx="10.5" cy="7.5" r="0.5" fill="#000"/>
+    <circle cx="13.5" cy="7.5" r="0.5" fill="#000"/>
+    {/* Smile */}
+    <path d="M10 9 Q12 10 14 9" stroke="#000" stroke-width="0.5" fill="none"/>
+  </svg>
+);

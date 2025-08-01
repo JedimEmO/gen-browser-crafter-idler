@@ -13,44 +13,74 @@ npm run preview  # Preview production build
 
 ## Project Overview
 
-IdleCrafter Singularity is a browser-based idle and automation game built with Solid.js, TypeScript, and Tailwind CSS. Players progress from manual resource gathering to building complex automated factories.
+IdleCrafter Singularity is a browser-based automation and exploration game built with Solid.js, TypeScript, and Tailwind CSS. Players control a character to gather resources and build automated factories.
 
 ## High-Level Architecture
 
 ### Core State Management
 - **gameStore.ts** (src/stores/gameStore.ts:1) - Central game state using Solid.js stores
-  - Manages inventory, factory grid, world chunks, and player position
-  - Provides actions for all game mutations
-  - Handles world generation with biome-based resource distribution
+  - Manages inventory (hotbar + main), factory grid, world chunks, and player position
+  - Provides actions for all game mutations including player movement
+  - Handles procedural world generation with biome-based resource distribution
+  - Tracks player position both globally (chunks) and locally (within chunk)
 
-### Game Loop System
+### Game Systems
 - **gameLoop.ts** (src/systems/gameLoop.ts:1) - Processes machine operations every second
-  - Handles furnace smelting with fuel consumption
-  - Manages coke oven processing
-  - Coordinates item transfer between machines via input/output sides
+  - Handles furnace smelting with internal fuel buffer system
+  - Manages coke oven processing for advanced materials
+  - Automatically transfers items between machines via configurable input/output sides
+  - Pulls fuel from adjacent chests when buffer is low
+
+- **gridHandlers.ts** (src/systems/gridHandlers.ts:1) - Handles all grid interactions
+  - Factory placement and machine interactions
+  - World resource harvesting (requires adjacent player position)
+  - Tool durability management
 
 ### Component Structure
 - **App.tsx** (src/App.tsx:1) - Main layout with three-column design
-  - Left: Inventory and machine details
-  - Center: Main game grid (factory or exploration view)
-  - Right: Recipe book
-- **MainGrid.tsx** - Renders either factory grid or world exploration view
-- **GridTile.tsx** - Individual tile handling for both factory machines and world resources
+  - Left: Minecraft-style inventory, machine details, and minimap (in explore mode)
+  - Center: Main game view with mode toggle (Factory/Explore)
+  - Right: Recipe book with crafting interface
+
+- **MinecraftInventory.tsx** - Minecraft-style inventory system
+  - 9 hotbar slots + 27 main inventory slots
+  - Drag and drop with cursor item tracking
+  - Shift-click for quick transfer
+  - Right-click to split stacks
+
+- **MainGrid.tsx** - Dual-mode game view
+  - Factory mode: 10x10 grid for placing machines
+  - Explore mode: 10x10 world view with player avatar
+  - Keyboard controls (WASD/arrows) for player movement
+  - Visual indicators for reachable tiles
+
+- **Minimap.tsx** - World navigation aid (explore mode only)
+  - 7x7 chunk overview with biome colors
+  - Shows explored vs unexplored areas
+  - Player position indicator and coordinates
+  - Compass directions
 
 ### Data Architecture
 - **types/index.ts** - TypeScript definitions for all game entities
+  - Inventory system with item/count structure
+  - Machine types: Furnace (with fuel buffer), Coke Oven, Chest
+  - World chunks with biome data and resource tiles
+
 - **data/** directory contains game content:
-  - items.ts - Item definitions with properties
-  - recipes.ts - Crafting, smelting, and coke oven recipes
-  - biomes.ts - World generation parameters
-  - icons.tsx - SVG icon components
+  - items.ts - Item definitions with fuel values and properties
+  - recipes.ts - Crafting (3x3 grid), smelting, and coke oven recipes
+  - biomes.ts - 5 biomes with unique resource distributions
+  - icons.tsx - SVG components for all items and the player avatar
 
 ### Key Game Mechanics
-1. **Dual View System**: Factory view for automation, Explore view for resource gathering
-2. **Machine Configuration**: Machines have configurable input/output sides
-3. **Tool Durability**: Tools degrade with use and must be replaced
-4. **Chunk-Based World**: 10x10 tile chunks generated on-demand
-5. **Drag & Drop**: Items can be dragged between inventory and machines
+1. **Player-Centric Exploration**: Control a character avatar to explore and gather resources
+2. **Dual View System**: Switch between factory automation and world exploration
+3. **Proximity-Based Interaction**: Must be adjacent to resources/machines to interact
+4. **Fuel Buffer System**: Furnaces consume fuel items immediately into internal buffer
+5. **Machine Automation**: Configurable I/O sides for complex automation setups
+6. **Tool Durability**: Tools degrade with use and break when depleted
+7. **Procedural World**: Infinite chunk-based world with biome variation
+8. **Visual Feedback**: Selected machines highlighted, reachable tiles indicated
 
 ## Development Guidelines
 

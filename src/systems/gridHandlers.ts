@@ -116,6 +116,19 @@ export function handleWorldGridClick(index: number) {
   const chunk = gameActions.getChunk(gameState.world.playerX, gameState.world.playerY);
   const tile = chunk.tiles[index];
   
+  // Calculate clicked position
+  const clickedX = index % 10;
+  const clickedY = Math.floor(index / 10);
+  
+  // Check if clicked tile is adjacent to player (including diagonals)
+  const dx = Math.abs(clickedX - gameState.world.playerLocalX);
+  const dy = Math.abs(clickedY - gameState.world.playerLocalY);
+  
+  if (dx > 1 || dy > 1) {
+    messageActions.logMessage('Too far away!', 'error');
+    return;
+  }
+  
   if (!tile) {
     gameActions.selectGridIndex(null);
     return;

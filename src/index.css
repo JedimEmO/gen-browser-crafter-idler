@@ -190,6 +190,36 @@
     background-color: rgba(0, 255, 204, 0.1) !important;
   }
   
+  .grid-tile.within-reach {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+  
+  .grid-tile.within-reach:hover {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+  }
+  
+  /* Minimap styles */
+  .minimap-chunk {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .minimap-chunk.current-chunk {
+    border-color: #fff;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  }
+  
+  .minimap-chunk.unexplored {
+    opacity: 0.3;
+  }
+  
+  .minimap-chunk:hover:not(.unexplored) {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
   .progress-bar {
     position: absolute;
     bottom: 0;
