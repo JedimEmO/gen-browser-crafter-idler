@@ -560,7 +560,6 @@ export const CraftingBenchUI: Component<Props> = (props) => {
                 const m = machine();
                 if (!m) return;
                 
-                let transferred = false;
                 for (let i = 0; i < 9; i++) {
                   if (!m.craftingGrid[i]) {
                     gameActions.updateMachine(props.gridIndex, (machine) => {
@@ -570,7 +569,6 @@ export const CraftingBenchUI: Component<Props> = (props) => {
                       return { ...m, craftingGrid: newGrid };
                     });
                     setGameState('inventory', 'main', index, null);
-                    transferred = true;
                     break;
                   } else if (m.craftingGrid[i]?.type === slot.item && m.craftingGrid[i]!.count < 64) {
                     const space = 64 - m.craftingGrid[i]!.count;
@@ -588,7 +586,6 @@ export const CraftingBenchUI: Component<Props> = (props) => {
                     } else {
                       setGameState('inventory', 'main', index, 'count', (c) => c - toTransfer);
                     }
-                    transferred = true;
                     break;
                   }
                 }

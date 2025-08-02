@@ -1,6 +1,7 @@
 import { For, createEffect } from 'solid-js';
 import type { Component } from 'solid-js';
-import { messageState } from '../stores/messageStore';
+import { messageState, messageActions } from '../stores/messageStore';
+import { saveGame, loadGame, resetGame } from '../stores/gameStore';
 
 export const MessageLog: Component = () => {
   let containerRef: HTMLDivElement | undefined;
@@ -26,6 +27,43 @@ export const MessageLog: Component = () => {
             </div>
           )}
         </For>
+      </div>
+      <div class="flex gap-2 mt-2 pt-2 border-t border-gray-700">
+        <button 
+          class="flex-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
+          onClick={() => {
+            if (saveGame()) {
+              messageActions.logMessage('Game saved successfully!');
+            } else {
+              messageActions.logMessage('Failed to save game.');
+            }
+          }}
+        >
+          Save
+        </button>
+        <button 
+          class="flex-1 px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors"
+          onClick={() => {
+            if (loadGame()) {
+              messageActions.logMessage('Game loaded successfully!');
+            } else {
+              messageActions.logMessage('No save game found.');
+            }
+          }}
+        >
+          Load
+        </button>
+        <button 
+          class="flex-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors"
+          onClick={() => {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone!')) {
+              resetGame();
+              messageActions.logMessage('Game reset to initial state.');
+            }
+          }}
+        >
+          Reset
+        </button>
       </div>
     </div>
   );

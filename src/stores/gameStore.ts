@@ -6,26 +6,16 @@ import { recipes } from '../data/recipes';
 
 const initialState: GameState = {
   inventory: {
-    hotbar: [
-      { item: 'pickaxe', count: 1 },
-      { item: 'wrench', count: 1 },
-      { item: 'chest', count: 5 },
-      { item: 'furnace', count: 3 },
-      null,
-      null,
-      null,
-      null,
-      null
-    ],
+    hotbar: Array(9).fill(null),
     main: Array(27).fill(null),
     craftingGrid: Array(4).fill(null),
     craftingOutput: null,
   },
   activeHotbarSlot: 0,
   cursorItem: null,
-  toolDurability: { pickaxe: 59, iron_pickaxe: null },
+  toolDurability: {},
   factoryGrid: Array(100).fill(null),
-  currentView: 'factory',
+  currentView: 'explore',
   selectedGridIndex: null,
   factoryPlayerX: 5,
   factoryPlayerY: 5,
@@ -473,6 +463,9 @@ function generateChunk(chunkX: number, chunkY: number, seed: number): Chunk {
 }
 
 function getBiome(x: number, y: number, seed: number): string {
+  // Starting chunk is always forest
+  if (x === 0 && y === 0) return 'forest';
+  
   // Simple noise function for biome generation
   const noise = (x: number, y: number) => {
     const n = Math.sin(x * 0.3 + seed) * Math.cos(y * 0.3 + seed);
@@ -486,5 +479,113 @@ function getBiome(x: number, y: number, seed: number): string {
   if (noiseValue < 0.8) return 'rocky_hills';
   return 'plains';
 }
+
+// Save/Load functionality
+const SAVE_KEY = 'webcraft_save';
+
+export const saveGame = () => {
+  try {
+    const saveData = {
+      version: 1,
+      timestamp: Date.now(),
+      gameState: gameState
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+    console.log('Game saved successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to save game:', error);
+    return false;
+  }
+};
+
+export const loadGame = () => {
+  try {
+    const savedData = localStorage.getItem(SAVE_KEY);
+    if (!savedData) return false;
+    
+    const { version, gameState: savedState } = JSON.parse(savedData);
+    
+    // Only load if save version matches (for future compatibility)
+    if (version !== 1) {
+      console.warn('Save version mismatch');
+      return false;
+    }
+    
+    // Load the saved state
+    setGameState(savedState);
+    console.log('Game loaded successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to load game:', error);
+    return false;
+  }
+};
+
+// Auto-save every 30 seconds
+let autoSaveInterval: number | null = null;
+
+export const startAutoSave = () => {
+  if (autoSaveInterval) return;
+  
+  autoSaveInterval = window.setInterval(() => {
+    saveGame();
+  }, 30000); // 30 seconds
+};
+
+export const stopAutoSave = () => {
+  if (autoSaveInterval) {
+    window.clearInterval(autoSaveInterval);
+    autoSaveInterval = null;
+  }
+};
+
+// Reset game to initial state
+export const resetGame = () => {
+  // Clear save data
+  localStorage.removeItem(SAVE_KEY);
+  
+  // Reset each part of the state individually
+  setGameState('inventory', {
+    hotbar: Array(9).fill(null),
+    main: Array(27).fill(null),
+    craftingGrid: Array(4).fill(null),
+    craftingOutput: null,
+  });
+  
+  setGameState('activeHotbarSlot', 0);
+  setGameState('cursorItem', null);
+  setGameState('toolDurability', {});
+  setGameState('factoryGrid', Array(100).fill(null));
+  setGameState('currentView', 'explore');
+  setGameState('selectedGridIndex', null);
+  setGameState('factoryPlayerX', 5);
+  setGameState('factoryPlayerY', 5);
+  setGameState('playerLevel', 1);
+  setGameState('experience', 0);
+  setGameState('experienceToNext', 100);
+  setGameState('experienceProgress', 0);
+  
+  setGameState('world', {
+    seed: Math.random() * 100000,
+    chunks: {},
+    playerX: 0,
+    playerY: 0,
+    playerLocalX: 5,
+    playerLocalY: 5,
+  });
+  
+  setGameState('combat', {
+    active: false,
+    enemy: null,
+    playerHp: 100,
+    playerMaxHp: 100,
+    turn: 'player',
+    log: [],
+  });
+  
+  console.log('Game reset to initial state');
+  return true;
+};
 
 export { gameState, setGameState, getEnemyXPReward };

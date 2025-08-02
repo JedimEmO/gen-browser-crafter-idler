@@ -1,4 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, onMount, onCleanup } from 'solid-js';
 import type { Component } from 'solid-js';
 import { MessageLog } from './components/MessageLog';
 import { MinecraftInventory } from './components/MinecraftInventory';
@@ -8,6 +8,7 @@ import { MachineDetails } from './components/MachineDetails';
 import { CombatModal } from './components/CombatModal';
 import { startGameLoop } from './systems/gameLoop';
 import { messageActions } from './stores/messageStore';
+import { loadGame, startAutoSave, stopAutoSave, saveGame } from './stores/gameStore';
 
 import DevMenu from './components/DevMenu';
 import DragGhost from './components/DragGhost';
@@ -15,11 +16,30 @@ import { CursorItem } from './components/CursorItem';
 
 const App: Component = () => {
   onMount(() => {
+    // Try to load saved game
+    const loaded = loadGame();
+    if (loaded) {
+      messageActions.logMessage('Game loaded from save.');
+    }
+    
     startGameLoop();
-    messageActions.logMessage('Welcome to IdleCrafter Singularity. Use the Wrench to configure machines.');
+    startAutoSave();
+    
+    if (!loaded) {
+      messageActions.logMessage('Welcome to IdleCrafter Singularity. Use the Wrench to configure machines.');
+    }
+    
+    // Save game when closing/reloading
+    window.addEventListener('beforeunload', saveGame);
+    
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') setDevOpen(false);
     });
+  });
+  
+  onCleanup(() => {
+    stopAutoSave();
+    window.removeEventListener('beforeunload', saveGame);
   });
   
   const [devOpen, setDevOpen] = createSignal(true);
