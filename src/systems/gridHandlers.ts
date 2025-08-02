@@ -8,6 +8,19 @@ import type { Furnace, CokeOven, Chest, Machine, CraftingBench } from '../types'
 export function handleFactoryGridClick(index: number) {
   const currentTile = gameState.factoryGrid[index];
   
+  // Calculate clicked position
+  const clickedX = index % 10;
+  const clickedY = Math.floor(index / 10);
+  
+  // Check if clicked tile is within 5-tile reach of factory player (using Manhattan distance)
+  const dx = Math.abs(clickedX - gameState.factoryPlayerX);
+  const dy = Math.abs(clickedY - gameState.factoryPlayerY);
+  
+  if ((dx + dy) > 5) {
+    messageActions.logMessage('Too far away!', 'error');
+    return;
+  }
+  
   // If clicking the same selected machine, deselect it
   if (gameState.selectedGridIndex === index) {
     gameActions.selectGridIndex(null);

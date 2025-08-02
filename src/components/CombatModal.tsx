@@ -1,6 +1,6 @@
 import { Show, For, createSignal } from 'solid-js';
 import type { Component } from 'solid-js';
-import { gameState, gameActions, setGameState } from '../stores/gameStore';
+import { gameState, gameActions, setGameState, getEnemyXPReward } from '../stores/gameStore';
 import { iconLibrary } from '../data/icons';
 
 export const CombatModal: Component = () => {
@@ -72,11 +72,24 @@ export const CombatModal: Component = () => {
       
       // Check if enemy is defeated after damage
       if (gameState.combat.enemy && gameState.combat.enemy!.hp <= 0) {
-        gameActions.addCombatLog(`${gameState.combat.enemy.type} defeated!`);
+        const defeatedEnemy = gameState.combat.enemy;
+        const xpReward = getEnemyXPReward(defeatedEnemy.type);
+        
+        gameActions.addCombatLog(`${defeatedEnemy.type} defeated!`);
+        gameActions.addCombatLog(`Gained ${xpReward} XP!`);
+        
+        // Grant experience
+        gameActions.gainExperience(xpReward);
+        
+        // Check if leveled up (after XP gain)
+        if (gameState.experienceProgress >= gameState.experienceToNext) {
+          gameActions.addCombatLog(`LEVEL UP! Now level ${gameState.playerLevel + 1}!`);
+          gameActions.addCombatLog(`Max HP increased to ${gameState.combat.playerMaxHp + 10}!`);
+        }
         
         // Remove enemy from chunk
         const chunkKey = `${gameState.world.playerX},${gameState.world.playerY}`;
-        gameActions.removeEnemy(chunkKey, gameState.combat.enemy.id);
+        gameActions.removeEnemy(chunkKey, defeatedEnemy.id);
         
         // End combat after delay
         setTimeout(() => {
@@ -123,12 +136,18 @@ export const CombatModal: Component = () => {
       
       // Check if player is defeated
       if (gameState.combat.playerHp <= 0) {
+        const lostXP = gameState.experienceProgress;
+        
         gameActions.addCombatLog('You have been defeated!');
-        // Reset player position
+        if (lostXP > 0) {
+          gameActions.addCombatLog(`Lost ${lostXP} XP progress towards next level!`);
+        }
+        gameActions.addCombatLog('Returning to factory...');
+        
+        // Reset XP progress and return to factory
         setTimeout(() => {
-          gameActions.movePlayerToChunk(0, 0);
-          setGameState('world', 'playerLocalX', 5);
-          setGameState('world', 'playerLocalY', 5);
+          gameActions.resetExperienceProgress();
+          gameActions.setView('factory');
           setGameState('combat', 'playerHp', gameState.combat.playerMaxHp);
           gameActions.endCombat();
         }, 2000);
@@ -257,7 +276,20 @@ export const CombatModal: Component = () => {
                     {/* Player Status */}
                     <div class="mb-8 space-y-2">
                       <div class="text-lg text-gray-300 text-center">
+                        Level {gameState.playerLevel}
+                      </div>
+                      <div class="text-lg text-gray-300 text-center">
                         HP: {gameState.combat.playerHp} / {gameState.combat.playerMaxHp}
+                      </div>
+                      {/* XP Progress Bar */}
+                      <div class="text-sm text-gray-400 text-center">
+                        XP: {gameState.experienceProgress} / {gameState.experienceToNext}
+                      </div>
+                      <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div 
+                          class="bg-gradient-to-r from-yellow-500 to-yellow-400 h-2 rounded-full transition-all duration-300"
+                          style={`width: ${Math.min(100, (gameState.experienceProgress / gameState.experienceToNext) * 100)}%`}
+                        ></div>
                       </div>
                     {/* Heart Health Display */}
                     <div class="flex justify-center gap-2 flex-wrap">

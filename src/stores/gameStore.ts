@@ -27,6 +27,12 @@ const initialState: GameState = {
   factoryGrid: Array(100).fill(null),
   currentView: 'factory',
   selectedGridIndex: null,
+  factoryPlayerX: 5,
+  factoryPlayerY: 5,
+  playerLevel: 1,
+  experience: 0,
+  experienceToNext: 100,
+  experienceProgress: 0,
   world: {
     seed: Math.random() * 100000,
     chunks: {},
@@ -234,6 +240,19 @@ export const gameActions = {
     setGameState('world', 'playerX', chunkX);
     setGameState('world', 'playerY', chunkY);
   },
+
+  moveFactoryPlayer: (dx: number, dy: number) => {
+    const newX = gameState.factoryPlayerX + dx;
+    const newY = gameState.factoryPlayerY + dy;
+    
+    // Keep player within factory grid bounds (0-9)
+    if (newX >= 0 && newX <= 9) {
+      setGameState('factoryPlayerX', newX);
+    }
+    if (newY >= 0 && newY <= 9) {
+      setGameState('factoryPlayerY', newY);
+    }
+  },
   
   getChunk: (chunkX: number, chunkY: number): Chunk => {
     const key = `${chunkX},${chunkY}`;
@@ -350,6 +369,36 @@ export const gameActions = {
       ...enemy,
       ...updates
     }));
+  },
+
+  gainExperience: (amount: number) => {
+    const newProgress = gameState.experienceProgress + amount;
+    const newExperience = gameState.experience + amount;
+    
+    setGameState('experience', newExperience);
+    setGameState('experienceProgress', newProgress);
+    
+    // Check for level up
+    if (newProgress >= gameState.experienceToNext) {
+      gameActions.levelUp();
+    }
+  },
+
+  levelUp: () => {
+    const newLevel = gameState.playerLevel + 1;
+    const newMaxHp = gameState.combat.playerMaxHp + 10;
+    const xpRequired = calculateXPForLevel(newLevel);
+    const remainingProgress = gameState.experienceProgress - gameState.experienceToNext;
+    
+    setGameState('playerLevel', newLevel);
+    setGameState('experienceToNext', xpRequired);
+    setGameState('experienceProgress', remainingProgress);
+    setGameState('combat', 'playerMaxHp', newMaxHp);
+    setGameState('combat', 'playerHp', newMaxHp); // Full heal on level up
+  },
+
+  resetExperienceProgress: () => {
+    setGameState('experienceProgress', 0);
   }
 };
 
@@ -359,6 +408,20 @@ const enemyStats = {
   goblin: { hp: 30, damage: 8 },
   wolf: { hp: 40, damage: 12 }
 };
+
+const enemyXPRewards = {
+  slime: 10,
+  goblin: 20,
+  wolf: 30
+};
+
+function calculateXPForLevel(level: number): number {
+  return level * 100;
+}
+
+function getEnemyXPReward(enemyType: 'slime' | 'goblin' | 'wolf'): number {
+  return enemyXPRewards[enemyType];
+}
 
 function generateChunk(chunkX: number, chunkY: number, seed: number): Chunk {
   const chunk: Chunk = {
@@ -424,4 +487,4 @@ function getBiome(x: number, y: number, seed: number): string {
   return 'plains';
 }
 
-export { gameState, setGameState };
+export { gameState, setGameState, getEnemyXPReward };

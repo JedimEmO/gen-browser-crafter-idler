@@ -9,17 +9,69 @@ import { Minimap } from './Minimap';
 import { CraftingBenchUI } from './CraftingBenchUI';
 
 const FactoryGrid: Component<{ onFactoryClick: (index: number) => void }> = (props) => {
+  const getFactoryPlayerIndex = () => {
+    return gameState.factoryPlayerY * 10 + gameState.factoryPlayerX;
+  };
+  
+  const isWithinFactoryReach = (index: number) => {
+    const isPlayerPosition = index === getFactoryPlayerIndex();
+    if (isPlayerPosition) return false;
+    
+    const tileX = index % 10;
+    const tileY = Math.floor(index / 10);
+    
+    const dx = Math.abs(tileX - gameState.factoryPlayerX);
+    const dy = Math.abs(tileY - gameState.factoryPlayerY);
+    
+    // 5-tile interaction radius using Manhattan distance
+    return (dx + dy) <= 5;
+  };
+  
   return (
     <For each={gameState.factoryGrid}>
-      {(tile, index) => (
-        <GridTile
-          tile={tile}
-          index={index()}
-          backgroundColor="var(--bg-tertiary)"
-          onClick={() => props.onFactoryClick(index())}
-          isSelected={gameState.selectedGridIndex === index()}
-        />
-      )}
+      {(tile, index) => {
+        const isPlayerPosition = () => index() === getFactoryPlayerIndex();
+        
+        return (
+          <div 
+            class="grid-tile"
+            classList={{ 
+              'within-reach': isWithinFactoryReach(index()),
+              'selected': gameState.selectedGridIndex === index()
+            }}
+            style={{ 
+              "background-color": "var(--bg-tertiary)",
+              "position": "relative"
+            }}
+            onClick={() => props.onFactoryClick(index())}
+          >
+            <Show when={tile}>
+              <GridTile
+                tile={tile}
+                index={index()}
+                backgroundColor="transparent"
+                onClick={() => {}}
+                isSelected={false}
+              />
+            </Show>
+            <Show when={isPlayerPosition()}>
+              <div style={{
+                "position": "absolute",
+                "top": "0",
+                "left": "0",
+                "width": "100%",
+                "height": "100%",
+                "display": "flex",
+                "align-items": "center",
+                "justify-content": "center",
+                "z-index": "10"
+              }}>
+                <PlayerIcon />
+              </div>
+            </Show>
+          </div>
+        );
+      }}
     </For>
   );
 };
@@ -125,36 +177,64 @@ export const MainGrid: Component = () => {
   };
 
   onMount(() => {
-    // Handle keyboard movement for explore view
+    // Handle keyboard movement for both factory and explore views
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameState.currentView !== 'explore') return;
-      if (gameState.combat.active) return; // Block movement during combat
-      
-      switch(e.key) {
-        case 'ArrowUp':
-        case 'w':
-        case 'W':
-          e.preventDefault();
-          gameActions.movePlayer(0, -1);
-          break;
-        case 'ArrowDown':
-        case 's':
-        case 'S':
-          e.preventDefault();
-          gameActions.movePlayer(0, 1);
-          break;
-        case 'ArrowLeft':
-        case 'a':
-        case 'A':
-          e.preventDefault();
-          gameActions.movePlayer(-1, 0);
-          break;
-        case 'ArrowRight':
-        case 'd':
-        case 'D':
-          e.preventDefault();
-          gameActions.movePlayer(1, 0);
-          break;
+      if (gameState.currentView === 'explore') {
+        if (gameState.combat.active) return; // Block movement during combat
+        
+        switch(e.key) {
+          case 'ArrowUp':
+          case 'w':
+          case 'W':
+            e.preventDefault();
+            gameActions.movePlayer(0, -1);
+            break;
+          case 'ArrowDown':
+          case 's':
+          case 'S':
+            e.preventDefault();
+            gameActions.movePlayer(0, 1);
+            break;
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+            e.preventDefault();
+            gameActions.movePlayer(-1, 0);
+            break;
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+            e.preventDefault();
+            gameActions.movePlayer(1, 0);
+            break;
+        }
+      } else if (gameState.currentView === 'factory') {
+        switch(e.key) {
+          case 'ArrowUp':
+          case 'w':
+          case 'W':
+            e.preventDefault();
+            gameActions.moveFactoryPlayer(0, -1);
+            break;
+          case 'ArrowDown':
+          case 's':
+          case 'S':
+            e.preventDefault();
+            gameActions.moveFactoryPlayer(0, 1);
+            break;
+          case 'ArrowLeft':
+          case 'a':
+          case 'A':
+            e.preventDefault();
+            gameActions.moveFactoryPlayer(-1, 0);
+            break;
+          case 'ArrowRight':
+          case 'd':
+          case 'D':
+            e.preventDefault();
+            gameActions.moveFactoryPlayer(1, 0);
+            break;
+        }
       }
     };
     

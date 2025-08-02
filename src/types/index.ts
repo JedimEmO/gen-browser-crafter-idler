@@ -140,6 +140,12 @@ export type GameState = {
   factoryGrid: (Machine | null)[];
   currentView: View;
   selectedGridIndex: number | null;
+  factoryPlayerX: number; // Player position in factory mode (0-9)
+  factoryPlayerY: number; // Player position in factory mode (0-9)
+  playerLevel: number; // Current player level
+  experience: number; // Total experience earned
+  experienceToNext: number; // XP needed for next level
+  experienceProgress: number; // Progress towards current level (reset on death)
   world: {
     seed: number;
     chunks: Record<string, Chunk>;

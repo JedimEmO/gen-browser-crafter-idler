@@ -19,10 +19,12 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
 
 ### Core State Management
 - **gameStore.ts** (src/stores/gameStore.ts:1) - Central game state using Solid.js stores
-  - Manages inventory (hotbar + main), factory grid, world chunks, and player position
-  - Provides actions for all game mutations including player movement
+  - Manages inventory (hotbar + main), factory grid, world chunks, and player positions
+  - Provides actions for all game mutations including player movement in both modes
   - Handles procedural world generation with biome-based resource distribution
   - Tracks player position both globally (chunks) and locally (within chunk)
+  - Manages experience/leveling system with XP calculations and level-up benefits
+  - Separate factory player position (factoryPlayerX, factoryPlayerY) with bounds checking
 
 ### Game Systems
 - **gameLoop.ts** (src/systems/gameLoop.ts:1) - Runs at 20 TPS (ticks per second) for smooth gameplay
@@ -35,7 +37,7 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Uses tick counter for precise timing of operations
 
 - **gridHandlers.ts** (src/systems/gridHandlers.ts:1) - Handles all grid interactions
-  - Factory placement and machine interactions
+  - Factory placement and machine interactions with 5-tile distance checking
   - World resource harvesting (requires adjacent player position)
   - Tool durability management
   - Blocks all interactions during active combat
@@ -68,7 +70,12 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Automatic recipe detection for 2x2 crafting with real-time output updates
 
 - **MainGrid.tsx** - Dual-mode game view
-  - Factory mode: 10x10 grid for placing machines
+  - Factory mode: 10x10 grid for placing machines with player-controlled movement
+    - Player avatar renders on factory grid at current position
+    - WASD/arrow key movement within factory bounds (0-9)
+    - 5-tile interaction radius using Manhattan distance (≤5 tiles)
+    - Visual highlighting for tiles within reach
+    - Distance checking prevents interactions outside radius
   - Explore mode: 10x10 world view with player avatar and enemies
   - Keyboard controls (WASD/arrows) for player movement (blocked during combat)
   - Visual indicators for reachable tiles (fixed to prevent wrapping)
@@ -100,6 +107,7 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Full-screen modal that blocks all other interactions
   - Final Fantasy-style turn-based combat with animations
   - Heart-based health display (each heart = 10 HP) with smooth transitions
+  - Player level and XP progress bar displayed prominently
   - Three action buttons: Attack, Defend, and Run Away
   - Attack: 10-20 damage with 10% miss chance and 20% critical hit chance (1.5x damage)
   - Defend: Reduces incoming damage by 5-10 points for one turn
@@ -107,8 +115,12 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Visual effects: damage numbers, miss indicators, sound wave animations
   - Screen shake on player damage, sprite animations for attacks
   - Turn indicators with glowing borders (green for player, red for enemy)
-  - Combat log at bottom of screen
-  - Handles player defeat (respawn at origin) and enemy defeat
+  - Combat log at bottom of screen shows XP gains and level ups
+  - Experience/Leveling System:
+    - Enemy defeats grant XP: slime (10), goblin (20), wolf (30)
+    - Level progression: each level requires level * 100 XP
+    - Level up increases max HP by 10 and fully heals player
+    - Player death resets XP progress towards current level and returns to factory mode
   - Enemy miss chance: 15%
 
 ### Data Architecture
@@ -118,6 +130,8 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - World chunks with biome data, resource tiles, and enemy arrays
   - Enemy type with position, HP, damage, and movement cooldown
   - CombatState for managing turn-based combat
+  - Player progression: level, experience, experienceToNext, experienceProgress
+  - Factory player position: factoryPlayerX, factoryPlayerY (separate from world position)
 
 - **data/** directory contains game content:
   - items.ts - Item definitions with fuel values and properties
@@ -143,14 +157,25 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
     - Combat triggers immediately when player and enemy collide
 11. **Combat System**:
    - Turn-based combat in full-screen modal with extensive animations
-   - Player has 100 HP, enemies vary (slime: 20 HP/5 damage, goblin: 30 HP/8 damage, wolf: 40 HP/12 damage)
+   - Player has 100 HP (base), enemies vary (slime: 20 HP/5 damage, goblin: 30 HP/8 damage, wolf: 40 HP/12 damage)
    - Player actions:
      - Attack: 10-20 damage, 10% miss chance, 20% critical hit chance (1.5x damage)
      - Defend: Block 5-10 damage on next enemy attack
      - Run: 50% success rate, enemy attacks if failed
    - Enemy attacks: Base damage + 0-5, 15% miss chance
    - Visual effects: Damage numbers, sprite animations, screen shake, turn indicators
-   - Death respawns player at origin (0,0) with full health
+12. **Experience/Leveling System**:
+   - Enemy defeats grant XP: slime (10), goblin (20), wolf (30)
+   - Level progression: each level requires level * 100 XP (100, 200, 300, etc.)
+   - Level up benefits: +10 max HP, full heal
+   - Death penalty: lose XP progress toward current level, return to factory mode
+   - Combat UI shows level and XP progress bar
+13. **Factory Player Movement**:
+   - Player avatar renders on factory grid with WASD/arrow movement
+   - 5-tile interaction radius using Manhattan distance
+   - Visual highlighting for reachable tiles
+   - Movement bounded within 10x10 factory grid (0-9 coordinates)
+   - Separate position state from exploration mode
 
 ## Development Guidelines
 
