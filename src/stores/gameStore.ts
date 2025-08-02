@@ -213,6 +213,19 @@ export const gameActions = {
     } else {
       setGameState('world', 'playerLocalY', newLocalY);
     }
+    
+    // Check for enemy collision immediately after moving
+    const chunkKey = `${gameState.world.playerX},${gameState.world.playerY}`;
+    const chunk = gameState.world.chunks[chunkKey];
+    if (chunk && chunk.enemies) {
+      const collidingEnemy = chunk.enemies.find(enemy => 
+        enemy.localX === gameState.world.playerLocalX && 
+        enemy.localY === gameState.world.playerLocalY
+      );
+      if (collidingEnemy && !gameState.combat.active) {
+        gameActions.startCombat(collidingEnemy);
+      }
+    }
   },
   
   movePlayerToChunk: (chunkX: number, chunkY: number) => {

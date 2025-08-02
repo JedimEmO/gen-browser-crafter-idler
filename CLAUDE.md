@@ -45,6 +45,16 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Center: Main game view with mode toggle (Factory/Explore)
   - Right: Recipe book with crafting interface
 
+- **styles/combat.css** - Combat animation definitions
+  - Attack swing animations with rotation and scale
+  - Critical hit effects with color shifts
+  - Damage flash filters for sprites
+  - Screen shake effect
+  - Health pulse animations
+  - Floating damage numbers and miss indicators
+  - Sound wave visual effects
+  - Turn indicator glows
+
 - **MinecraftInventory.tsx** - Minecraft-style inventory system
   - 9 hotbar slots + 27 main inventory slots
   - Drag and drop with cursor item tracking
@@ -66,11 +76,18 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
 
 - **CombatModal.tsx** - Turn-based combat interface
   - Full-screen modal that blocks all other interactions
-  - Final Fantasy-style turn-based combat
-  - Heart-based health display (each heart = 10 HP)
-  - Attack and Run actions with success/failure mechanics
+  - Final Fantasy-style turn-based combat with animations
+  - Heart-based health display (each heart = 10 HP) with smooth transitions
+  - Three action buttons: Attack, Defend, and Run Away
+  - Attack: 10-20 damage with 10% miss chance and 20% critical hit chance (1.5x damage)
+  - Defend: Reduces incoming damage by 5-10 points for one turn
+  - Run Away: 50% success rate, enemy gets free attack if failed
+  - Visual effects: damage numbers, miss indicators, sound wave animations
+  - Screen shake on player damage, sprite animations for attacks
+  - Turn indicators with glowing borders (green for player, red for enemy)
   - Combat log at bottom of screen
   - Handles player defeat (respawn at origin) and enemy defeat
+  - Enemy miss chance: 15%
 
 ### Data Architecture
 - **types/index.ts** - TypeScript definitions for all game entities
@@ -98,13 +115,17 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
 9. **Enemy System**: 
    - Enemies spawn 1-3 per chunk (slime, goblin, wolf with different stats)
    - Enemies move towards player every 2 seconds
-   - Combat triggers when enemy reaches player
+   - Combat triggers immediately when player and enemy collide
 10. **Combat System**:
-   - Turn-based combat in full-screen modal
-   - Player has 100 HP, enemies vary (slime: 20, goblin: 30, wolf: 40)
-   - Attack deals 10-20 damage, enemies deal base damage + 0-5
-   - Run action has 50% success rate
-   - Death respawns player at origin (0,0)
+   - Turn-based combat in full-screen modal with extensive animations
+   - Player has 100 HP, enemies vary (slime: 20 HP/5 damage, goblin: 30 HP/8 damage, wolf: 40 HP/12 damage)
+   - Player actions:
+     - Attack: 10-20 damage, 10% miss chance, 20% critical hit chance (1.5x damage)
+     - Defend: Block 5-10 damage on next enemy attack
+     - Run: 50% success rate, enemy attacks if failed
+   - Enemy attacks: Base damage + 0-5, 15% miss chance
+   - Visual effects: Damage numbers, sprite animations, screen shake, turn indicators
+   - Death respawns player at origin (0,0) with full health
 
 ## Development Guidelines
 

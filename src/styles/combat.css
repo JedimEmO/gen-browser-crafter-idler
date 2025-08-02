@@ -1,0 +1,252 @@
+/* Combat Animations */
+
+@keyframes attack-swing {
+  0% { transform: scale(8) rotate(0deg); }
+  25% { transform: scale(10) rotate(-20deg) translateX(20px); }
+  50% { transform: scale(10) rotate(20deg) translateX(-20px); }
+  75% { transform: scale(9) rotate(-5deg); }
+  100% { transform: scale(8) rotate(0deg); }
+}
+
+@keyframes damage-flash {
+  0% { filter: brightness(1) saturate(1); }
+  25% { filter: brightness(3) saturate(0) contrast(2); }
+  50% { filter: brightness(0.5) saturate(0) contrast(1.5); }
+  75% { filter: brightness(2) saturate(0.5) contrast(1.2); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+@keyframes screen-shake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-10px) rotate(-0.5deg); }
+  20% { transform: translateX(10px) rotate(0.5deg); }
+  30% { transform: translateX(-8px) rotate(-0.3deg); }
+  40% { transform: translateX(8px) rotate(0.3deg); }
+  50% { transform: translateX(-6px) rotate(-0.2deg); }
+  60% { transform: translateX(6px) rotate(0.2deg); }
+  70% { transform: translateX(-4px) rotate(-0.1deg); }
+  80% { transform: translateX(4px) rotate(0.1deg); }
+  90% { transform: translateX(-2px); }
+}
+
+@keyframes turn-indicator {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 30px 10px rgba(34, 197, 94, 0.4); }
+}
+
+@keyframes enemy-turn-indicator {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 30px 10px rgba(239, 68, 68, 0.4); }
+}
+
+@keyframes health-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.2); filter: brightness(1.5) drop-shadow(0 0 10px rgba(239, 68, 68, 0.8)); }
+}
+
+@keyframes heart-beat {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.05); }
+  45% { transform: scale(0.95); }
+}
+
+@keyframes critical-hit {
+  0% { 
+    transform: scale(8) rotate(0deg); 
+    filter: brightness(1);
+  }
+  20% { 
+    transform: scale(11) rotate(-30deg); 
+    filter: brightness(2) contrast(2) saturate(2);
+  }
+  40% { 
+    transform: scale(11) rotate(30deg); 
+    filter: brightness(2.5) contrast(2) saturate(3) hue-rotate(45deg);
+  }
+  60% { 
+    transform: scale(9) rotate(-15deg); 
+    filter: brightness(2) contrast(1.5) saturate(2);
+  }
+  100% { 
+    transform: scale(8) rotate(0deg); 
+    filter: brightness(1);
+  }
+}
+
+@keyframes damage-number {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.5);
+  }
+  20% {
+    transform: translateY(-10px) scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(1);
+  }
+}
+
+@keyframes miss-indicator {
+  0% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px) rotate(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) translateX(20px) rotate(30deg);
+  }
+}
+
+@keyframes defend-shield {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  20% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+  80% { transform: scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+}
+
+/* Animation Classes */
+.attack-animation {
+  animation: attack-swing 0.6s ease-out;
+}
+
+.damage-animation {
+  animation: damage-flash 0.4s ease-out;
+}
+
+.screen-shake {
+  animation: screen-shake 0.5s ease-out;
+}
+
+.player-turn-active {
+  animation: turn-indicator 2s ease-in-out infinite;
+}
+
+.enemy-turn-active {
+  animation: enemy-turn-indicator 2s ease-in-out infinite;
+}
+
+.health-damage {
+  animation: health-pulse 0.3s ease-out;
+}
+
+.heart-icon {
+  animation: heart-beat 1.5s ease-in-out infinite;
+}
+
+.critical-hit-animation {
+  animation: critical-hit 0.8s ease-out;
+}
+
+.damage-number {
+  animation: damage-number 1.5s ease-out forwards;
+  position: absolute;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #ef4444;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(239, 68, 68, 0.5);
+  pointer-events: none;
+  z-index: 200;
+  transform: translate(-50%, -50%);
+}
+
+.damage-number.critical {
+  color: #fbbf24;
+  font-size: 4rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 30px rgba(251, 191, 36, 0.8);
+}
+
+.miss-indicator {
+  animation: miss-indicator 1s ease-out forwards;
+  position: absolute;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #9ca3af;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 200;
+  transform: translate(-50%, -50%);
+}
+
+.defend-animation::before {
+  content: "🛡️";
+  position: absolute;
+  font-size: 4rem;
+  animation: defend-shield 1s ease-out;
+  z-index: 150;
+}
+
+/* Transition for health bars */
+.health-bar-transition {
+  transition: width 0.5s ease-out, background-color 0.3s ease-out;
+}
+
+/* Combat background animation */
+@keyframes combat-bg-pulse {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+}
+
+.combat-bg-effect {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+  animation: combat-bg-pulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Sound effect visual indicators */
+@keyframes sound-wave {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.sound-effect {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  pointer-events: none;
+  z-index: 250;
+}
+
+.sound-effect::before,
+.sound-effect::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border: 3px solid;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: sound-wave 0.8s ease-out;
+}
+
+.sound-effect::after {
+  animation-delay: 0.2s;
+}
+
+.sound-effect.attack::before,
+.sound-effect.attack::after {
+  border-color: #ef4444;
+}
+
+.sound-effect.defend::before,
+.sound-effect.defend::after {
+  border-color: #3b82f6;
+}
+
+.sound-effect.critical::before,
+.sound-effect.critical::after {
+  border-color: #fbbf24;
+}
