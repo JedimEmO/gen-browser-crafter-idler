@@ -46,7 +46,7 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
 - **App.tsx** (src/App.tsx:1) - Main layout with three-column design (no header)
   - Left: Machine details panel with expanded space for detailed information
   - Center: Main game view with mode toggle (Factory/Explore), plus player inventory below
-  - Right: System log (MessageLog) showing game events and messages
+  - Right: Recipe Book (top) and System log (bottom)
 
 - **styles/combat.css** - Combat animation definitions
   - Attack swing animations with rotation and scale
@@ -78,6 +78,7 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
     - 5-tile interaction radius using Manhattan distance (≤5 tiles)
     - Visual highlighting for tiles within reach
     - Distance checking prevents interactions outside radius
+    - Crafting bench selection properly updates selectedGridIndex for recipe book
   - Explore mode: 10x10 world view with player avatar and enemies
   - Keyboard controls (WASD/arrows) for player movement (blocked during combat)
   - Visual indicators for reachable tiles (fixed to prevent wrapping)
@@ -92,12 +93,13 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Player position indicator and coordinates
   - Compass directions
 
-- **RecipeBook.tsx** - Interactive recipe browser and grid-filling system
-  - Displays all available recipes with material requirements
-  - Smart recipe filtering based on available materials and crafting context
-  - "Fill" button places recipe pattern directly into appropriate crafting grid
-  - Automatically detects 2x2 vs 3x3 crafting bench context
-  - Real-time material availability checking with color-coded tooltips
+- **RecipeBook.tsx** - Compact grid-based recipe browser
+  - 6-column icon grid showing all craftable items
+  - Visual indicators: cyan borders for craftable recipes, dimmed for unavailable
+  - Hover tooltips show recipe name, materials needed with availability counts
+  - Shift-click to fill recipe into crafting bench (3x3 grid only)
+  - Recipe icons with quantity badges and bench requirement indicators (⚒)
+  - Prevents resource waste by checking if grid already contains recipe
 
 - **CraftingBenchUI.tsx** - 3x3 crafting bench interface
   - Full 3x3 crafting grid for complex recipes
@@ -143,11 +145,18 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
 
 - **data/** directory contains game content:
   - items.ts - Item definitions with fuel values and properties
+    - New items: hammer (tool), iron_plate (material), blast_furnace (machine)
   - recipes.ts - Crafting (3x3 grid), smelting, and coke oven recipes
+    - Crafting recipes:
+      - hammer: stick + iron_ingot → hammer (2x2 compatible)
+      - iron_plate: hammer + 2x iron_ingot → iron_plate (requires bench)
+      - blast_furnace: 6x iron_plate + 3x brick → blast_furnace (requires bench)
     - Smelting times: iron_ore (100 ticks/5s), brick_mixture (60 ticks/3s)
     - Coke oven times: wood to coal_coke (200 ticks/10s)
   - biomes.ts - 5 biomes with unique resource distributions and smaller biome sizes (0.3 frequency)
-  - icons.tsx - SVG components for all items, player avatar, enemies (slime, goblin, wolf), and world resources
+  - icons.tsx - SVG components for all items, player avatar, enemies, and world resources
+    - All recipe outputs have corresponding icons in iconLibrary
+    - Icons use viewBox="0 0 100 100" for consistency
 
 ### Key Game Mechanics
 1. **Game Loop**: Runs at 20 TPS (50ms per tick) for smooth gameplay

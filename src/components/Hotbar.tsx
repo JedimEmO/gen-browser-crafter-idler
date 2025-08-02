@@ -135,8 +135,8 @@ export const Hotbar: Component = () => {
             }
           }
         } else {
-          // Swap items
-          const temp = slot;
+          // Swap items - create a copy to avoid reference issues
+          const temp = { item: slot.item, count: slot.count };
           setGameState('inventory', 'hotbar', index, gameState.cursorItem);
           gameActions.setCursorItem(temp);
         }

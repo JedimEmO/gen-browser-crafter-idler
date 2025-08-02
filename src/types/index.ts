@@ -72,7 +72,27 @@ export type CraftingBench = {
   outputSlot: MachineInventorySlot | null;
 }
 
-export type Machine = Furnace | CokeOven | Chest | CraftingBench;
+export type BlastFurnaceRecipe = {
+  output: string;
+  time: number;
+}
+
+export type BlastFurnace = {
+  type: 'blast_furnace';
+  inputSide: Direction;
+  outputSide: Direction;
+  fuelBuffer: number; // Total fuel stored (from coal coke)
+  maxFuelBuffer: number; // Maximum fuel capacity
+  progress: number;
+  isProcessing: boolean;
+  processingItem?: string;
+  inventory: {
+    material: MachineInventorySlot | null; // For iron ingots
+    output: MachineInventorySlot | null; // For steel ingots
+  };
+}
+
+export type Machine = Furnace | CokeOven | Chest | CraftingBench | BlastFurnace;
 
 export type Direction = 'top' | 'bottom' | 'left' | 'right';
 

@@ -1,9 +1,9 @@
 import { Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { iconLibrary } from '../data/icons';
-import type { Furnace, CokeOven, Machine } from '../types';
+import type { Furnace, CokeOven, Machine, BlastFurnace } from '../types';
 import { dragActions } from '../stores/dragStore';
-import { smeltingRecipes, cokeOvenRecipes } from '../data/recipes';
+import { smeltingRecipes, cokeOvenRecipes, blastFurnaceRecipes } from '../data/recipes';
 
 interface GridTileProps {
   tile: Machine | null;
@@ -44,6 +44,11 @@ export const GridTile: Component<GridTileProps> = (props) => {
       return (props.tile.progress / recipe.time) * 100;
     }
     
+    if (props.tile.type === 'blast_furnace' && props.tile.isProcessing && props.tile.processingItem) {
+      const recipe = blastFurnaceRecipes[props.tile.processingItem];
+      return (props.tile.progress / recipe.time) * 100;
+    }
+    
     return 0;
   };
   
@@ -51,6 +56,7 @@ export const GridTile: Component<GridTileProps> = (props) => {
     if (!props.tile) return false;
     if (props.tile.type === 'furnace') return props.tile.isSmelting;
     if (props.tile.type === 'coke_oven') return props.tile.isProcessing;
+    if (props.tile.type === 'blast_furnace') return props.tile.isProcessing;
     return false;
   };
   
@@ -70,13 +76,13 @@ export const GridTile: Component<GridTileProps> = (props) => {
         <Show when={isProcessing()}>
           <div class="progress-bar" style={{ width: `${getProgressPercent()}%` }} />
         </Show>
-        <Show when={props.tile!.type === 'furnace' || props.tile!.type === 'coke_oven'}>
+        <Show when={props.tile!.type === 'furnace' || props.tile!.type === 'coke_oven' || props.tile!.type === 'blast_furnace'}>
           <>
-            <Show when={(props.tile as Furnace | CokeOven).inputSide}>
-              <IOIndicator type="input" side={(props.tile as Furnace | CokeOven).inputSide} />
+            <Show when={(props.tile as Furnace | CokeOven | BlastFurnace).inputSide}>
+              <IOIndicator type="input" side={(props.tile as Furnace | CokeOven | BlastFurnace).inputSide} />
             </Show>
-            <Show when={(props.tile as Furnace | CokeOven).outputSide}>
-              <IOIndicator type="output" side={(props.tile as Furnace | CokeOven).outputSide} />
+            <Show when={(props.tile as Furnace | CokeOven | BlastFurnace).outputSide}>
+              <IOIndicator type="output" side={(props.tile as Furnace | CokeOven | BlastFurnace).outputSide} />
             </Show>
           </>
         </Show>

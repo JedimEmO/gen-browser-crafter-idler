@@ -3,9 +3,9 @@ import type { Component } from 'solid-js';
 import { gameState, gameActions } from '../stores/gameStore';
 import { itemData } from '../data/items';
 import { worldResourceData } from '../data/biomes';
-import { smeltingRecipes, cokeOvenRecipes } from '../data/recipes';
+import { smeltingRecipes, cokeOvenRecipes, blastFurnaceRecipes } from '../data/recipes';
 import { messageActions } from '../stores/messageStore';
-import type { Furnace, CokeOven, Chest, Direction, Machine } from '../types';
+import type { Furnace, CokeOven, Chest, Direction, Machine, BlastFurnace } from '../types';
 import { iconLibrary } from '../data/icons';
 
 export const MachineDetails: Component = () => {
@@ -17,10 +17,10 @@ export const MachineDetails: Component = () => {
   const handleConfigClick = (configType: 'input' | 'output', side: Direction) => {
     if (gameState.selectedGridIndex === null) return;
     const m = selectedFactoryMachine();
-    if (!m || (m.type !== 'furnace' && m.type !== 'coke_oven')) return;
+    if (!m || (m.type !== 'furnace' && m.type !== 'coke_oven' && m.type !== 'blast_furnace')) return;
     gameActions.updateMachine(gameState.selectedGridIndex, (cur) => {
-      if (cur.type === 'furnace' || cur.type === 'coke_oven') {
-        const updated = { ...cur } as Furnace | CokeOven;
+      if (cur.type === 'furnace' || cur.type === 'coke_oven' || cur.type === 'blast_furnace') {
+        const updated = { ...cur } as Furnace | CokeOven | BlastFurnace;
         if (configType === 'input') updated.inputSide = side; else updated.outputSide = side;
         return updated as Machine;
       }
@@ -39,6 +39,8 @@ export const MachineDetails: Component = () => {
       const inv = (m as Furnace).inventory; if (inv.input) gameActions.addToInventory(inv.input.type, inv.input.count); if (inv.output) gameActions.addToInventory(inv.output.type, inv.output.count);
     } else if (m.type === 'coke_oven') {
       const inv = (m as CokeOven).inventory; if (inv.input) gameActions.addToInventory(inv.input.type, inv.input.count); if (inv.output) gameActions.addToInventory(inv.output.type, inv.output.count);
+    } else if (m.type === 'blast_furnace') {
+      const inv = (m as BlastFurnace).inventory; if (inv.material) gameActions.addToInventory(inv.material.type, inv.material.count); if (inv.output) gameActions.addToInventory(inv.output.type, inv.output.count);
     }
     messageActions.logMessage(`Picked up ${itemData[m.type].name}.`, 'success');
     gameActions.removeMachine(gameState.selectedGridIndex);
@@ -175,6 +177,131 @@ export const MachineDetails: Component = () => {
     }
   };
 
+  const handleBlastFurnaceSlotClick = (e: MouseEvent, slotType: 'material' | 'output') => {
+    e.preventDefault();
+    if (gameState.selectedGridIndex === null) return;
+    const m = selectedFactoryMachine();
+    if (!m || m.type !== 'blast_furnace') return;
+    const blastFurnace = m as BlastFurnace;
+    const slot = blastFurnace.inventory[slotType];
+
+    if (e.shiftKey && e.button === 0 && slot) {
+      const added = gameActions.addToInventory(slot.type, slot.count);
+      if (added > 0) {
+        gameActions.updateMachine(gameState.selectedGridIndex, (cur) => {
+          if (cur.type !== 'blast_furnace') return cur;
+          const upd = { ...cur } as BlastFurnace;
+          const curSlot = upd.inventory[slotType];
+          if (curSlot) {
+            const remaining = curSlot.count - added;
+            upd.inventory = { ...upd.inventory, [slotType]: remaining <= 0 ? null : { ...curSlot, count: remaining } };
+          }
+          return upd as Machine;
+        });
+      }
+      return;
+    }
+
+    if (e.button === 0) {
+      if (gameState.cursorItem) {
+        const canPlace = slotType === 'material' && blastFurnaceRecipes[gameState.cursorItem.item];
+        if (canPlace) {
+          if (!slot || slot.type === gameState.cursorItem.item) {
+            const current = slot ? slot.count : 0;
+            const space = 64 - current;
+            const toAdd = Math.min(space, gameState.cursorItem.count);
+            if (toAdd > 0) {
+              gameActions.updateMachine(gameState.selectedGridIndex, (cur) => {
+                if (cur.type !== 'blast_furnace') return cur;
+                const upd = { ...cur } as BlastFurnace;
+                const curSlot = upd.inventory[slotType];
+                if (!curSlot) {
+                  upd.inventory = { ...upd.inventory, [slotType]: { type: gameState.cursorItem!.item, count: toAdd } };
+                } else {
+                  upd.inventory = { ...upd.inventory, [slotType]: { ...curSlot, count: curSlot.count + toAdd } };
+                }
+                return upd as Machine;
+              });
+              if (toAdd === gameState.cursorItem.count) gameActions.setCursorItem(null); else gameActions.setCursorItem({ ...gameState.cursorItem, count: gameState.cursorItem.count - toAdd });
+            }
+          }
+        }
+      } else if (slot) {
+        gameActions.setCursorItem({ item: slot.type, count: slot.count });
+        gameActions.updateMachine(gameState.selectedGridIndex, (cur) => {
+          if (cur.type !== 'blast_furnace') return cur;
+          const upd = { ...cur } as BlastFurnace;
+          upd.inventory = { ...upd.inventory, [slotType]: null };
+          return upd as Machine;
+        });
+      }
+    } else if (e.button === 2) {
+      if (gameState.cursorItem) {
+        const canPlace = slotType === 'material' && blastFurnaceRecipes[gameState.cursorItem.item];
+        if (canPlace && (!slot || slot.type === gameState.cursorItem.item)) {
+          const current = slot ? slot.count : 0;
+          if (current < 64) {
+            gameActions.updateMachine(gameState.selectedGridIndex, (cur) => {
+              if (cur.type !== 'blast_furnace') return cur;
+              const upd = { ...cur } as BlastFurnace;
+              const curSlot = upd.inventory[slotType];
+              if (!curSlot) {
+                upd.inventory = { ...upd.inventory, [slotType]: { type: gameState.cursorItem!.item, count: 1 } };
+              } else {
+                upd.inventory = { ...upd.inventory, [slotType]: { ...curSlot, count: curSlot.count + 1 } };
+              }
+              return upd as Machine;
+            });
+            if (gameState.cursorItem.count === 1) gameActions.setCursorItem(null); else gameActions.setCursorItem({ ...gameState.cursorItem, count: gameState.cursorItem.count - 1 });
+          }
+        }
+      } else if (slot) {
+        const half = Math.ceil(slot.count / 2);
+        const remaining = slot.count - half;
+        gameActions.setCursorItem({ item: slot.type, count: half });
+        gameActions.updateMachine(gameState.selectedGridIndex, (cur) => {
+          if (cur.type !== 'blast_furnace') return cur;
+          const upd = { ...cur } as BlastFurnace;
+          if (remaining === 0) {
+            upd.inventory = { ...upd.inventory, [slotType]: null };
+          } else {
+            const curSlot = upd.inventory[slotType]!;
+            upd.inventory = { ...upd.inventory, [slotType]: { ...curSlot, count: remaining } };
+          }
+          return upd as Machine;
+        });
+      }
+    }
+  };
+
+  const handleBlastFurnaceFuelClick = (e: MouseEvent) => {
+    e.preventDefault();
+    if (gameState.selectedGridIndex === null) return;
+    const m = selectedFactoryMachine();
+    if (!m || m.type !== 'blast_furnace') return;
+    const blastFurnace = m as BlastFurnace;
+
+    if (e.button === 0 && gameState.cursorItem && gameState.cursorItem.item === 'coal_coke') {
+      const fuelValue = itemData.coal_coke.fuel || 0;
+      if (fuelValue && blastFurnace.fuelBuffer < blastFurnace.maxFuelBuffer) {
+        const space = blastFurnace.maxFuelBuffer - blastFurnace.fuelBuffer;
+        const need = Math.ceil(space / fuelValue);
+        const take = Math.min(need, gameState.cursorItem.count);
+        if (take > 0) {
+          const fuelToAdd = take * fuelValue;
+          gameActions.updateMachine(gameState.selectedGridIndex, (cur) => {
+            if (cur.type !== 'blast_furnace') return cur;
+            const upd = { ...cur } as BlastFurnace;
+            upd.fuelBuffer = Math.min(upd.fuelBuffer + fuelToAdd, upd.maxFuelBuffer);
+            return upd as Machine;
+          });
+          if (take === gameState.cursorItem.count) gameActions.setCursorItem(null); else gameActions.setCursorItem({ ...gameState.cursorItem, count: gameState.cursorItem.count - take });
+          messageActions.logMessage(`Added ${take}x Coal Coke (${fuelToAdd} fuel)`, 'success');
+        }
+      }
+    }
+  };
+
   const handleChestSlotClick = (e: MouseEvent, slotIndex: number) => {
     e.preventDefault();
     if (gameState.selectedGridIndex === null) return;
@@ -296,7 +423,7 @@ export const MachineDetails: Component = () => {
                     <h3 class="text-lg font-medium text-cyan-400 mb-2">{itemData[m.type].name}</h3>
                   </div>
 
-                  <Show when={gameState.inventory.hotbar[gameState.activeHotbarSlot]?.item === 'wrench' && (m.type === 'furnace' || m.type === 'coke_oven') && itemData[m.type].configurable}>
+                  <Show when={gameState.inventory.hotbar[gameState.activeHotbarSlot]?.item === 'wrench' && (m.type === 'furnace' || m.type === 'coke_oven' || m.type === 'blast_furnace') && itemData[m.type].configurable}>
                     <div class="space-y-4 border-t border-gray-800 pt-4">
                       <div>
                         <p class="text-xs text-gray-500 mb-2">INPUT SIDE</p>
@@ -377,6 +504,54 @@ export const MachineDetails: Component = () => {
                                 {iconLibrary[c.inventory.output.type] ? iconLibrary[c.inventory.output.type]() : <span class="text-xs font-medium">{itemData[c.inventory.output.type]?.name.charAt(0).toUpperCase()}</span>}
                                 {c.inventory.output.count > 1 && <div class="item-count">{c.inventory.output.count}</div>}
                               </>)}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </Show>
+
+                  <Show when={m.type === 'blast_furnace'}>
+                    {(() => {
+                      const bf = m as BlastFurnace;
+                      return (
+                        <div class="space-y-3">
+                          <div class="space-y-2">
+                            <p class="text-sm"><span class="text-gray-500">Fuel Buffer:</span><span class="ml-2 text-cyan-400">{bf.fuelBuffer || 0}/{bf.maxFuelBuffer || 200}</span></p>
+                            <div class="w-full bg-gray-700 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full" style={{ width: `${((bf.fuelBuffer || 0) / (bf.maxFuelBuffer || 200)) * 100}%` }} /></div>
+                          </div>
+                          <Show when={bf.isProcessing}>
+                            <div class="space-y-2">
+                              <p class="text-sm"><span class="text-gray-500">Processing:</span><span class="ml-2 text-green-400">Steel Production</span></p>
+                              <div class="w-full bg-gray-700 rounded-full h-2"><div class="bg-green-500 h-2 rounded-full" style={{ width: `${((bf.progress || 0) / 150) * 100}%` }} /></div>
+                            </div>
+                          </Show>
+                          <div class="grid grid-cols-3 gap-2">
+                            <div class="text-center">
+                              <p class="text-xs text-gray-500 mb-1">Material</p>
+                              <div class="slot" classList={{ 'opacity-50': !bf.inventory?.material }} onMouseDown={(e) => handleBlastFurnaceSlotClick(e, 'material')}>
+                                <Show when={bf.inventory?.material}>
+                                  {iconLibrary[bf.inventory.material!.type] ? iconLibrary[bf.inventory.material!.type]() : <span class="text-xs font-medium">{itemData[bf.inventory.material!.type]?.name.charAt(0).toUpperCase()}</span>}
+                                  <Show when={bf.inventory.material!.count > 1}>
+                                    <div class="item-count">{bf.inventory.material!.count}</div>
+                                  </Show>
+                                </Show>
+                              </div>
+                            </div>
+                            <div class="text-center">
+                              <p class="text-xs text-gray-500 mb-1">Output</p>
+                              <div class="slot" classList={{ 'opacity-50': !bf.inventory?.output }} onMouseDown={(e) => handleBlastFurnaceSlotClick(e, 'output')}>
+                                <Show when={bf.inventory?.output}>
+                                  {iconLibrary[bf.inventory.output!.type] ? iconLibrary[bf.inventory.output!.type]() : <span class="text-xs font-medium">{itemData[bf.inventory.output!.type]?.name.charAt(0).toUpperCase()}</span>}
+                                  <Show when={bf.inventory.output!.count > 1}>
+                                    <div class="item-count">{bf.inventory.output!.count}</div>
+                                  </Show>
+                                </Show>
+                              </div>
+                            </div>
+                            <div class="text-center">
+                              <p class="text-xs text-gray-500 mb-1">Fuel</p>
+                              <div class="slot" classList={{ 'opacity-50': (bf.fuelBuffer || 0) >= (bf.maxFuelBuffer || 200) }} onMouseDown={handleBlastFurnaceFuelClick}><span class="text-xs text-blue-400">Coal Coke</span></div>
                             </div>
                           </div>
                         </div>

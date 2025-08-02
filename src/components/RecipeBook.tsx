@@ -4,11 +4,13 @@ import { recipes } from '../data/recipes';
 import { itemData } from '../data/items';
 import { gameState, gameActions, setGameState } from '../stores/gameStore';
 import { messageActions } from '../stores/messageStore';
+import { iconLibrary } from '../data/icons';
 import type { CraftingBench } from '../types';
 
 export const RecipeBook: Component = () => {
   const [hoveredRecipe, setHoveredRecipe] = createSignal<string | null>(null);
   const [mousePos, setMousePos] = createSignal({ x: 0, y: 0 });
+  
   
   const handleFillGrid = (recipeId: string) => {
     const recipe = recipes[recipeId];
@@ -17,27 +19,34 @@ export const RecipeBook: Component = () => {
     const isBenchOpen = gameState.selectedGridIndex !== null && 
                        gameState.factoryGrid[gameState.selectedGridIndex]?.type === 'crafting_bench';
     
-    // Check if recipe requires bench but we're not in one
-    if (recipe.requiresBench && !isBenchOpen) {
-      messageActions.logMessage('This recipe requires a crafting bench!', 'error');
+    // Fill button only works with crafting bench
+    if (!isBenchOpen) {
+      messageActions.logMessage('Fill button requires a crafting bench!', 'error');
       return;
     }
-    
-    // Check if recipe fits in 2x2 grid when not in bench
-    if (!isBenchOpen) {
-      let fits2x2 = true;
-      for (let i = 0; i < 9; i++) {
-        const row = Math.floor(i / 3);
-        const col = i % 3;
-        if ((row >= 2 || col >= 2) && recipe.shape[i] !== null) {
-          fits2x2 = false;
+
+    // Check if the grid already matches this recipe - prevent resource waste
+    const bench = gameState.factoryGrid[gameState.selectedGridIndex!] as CraftingBench;
+    let gridAlreadyFilled = true;
+    for (let i = 0; i < 9; i++) {
+      const expectedItem = recipe.shape[i];
+      const actualSlot = bench.craftingGrid[i];
+      if (expectedItem) {
+        if (!actualSlot || actualSlot.type !== expectedItem || actualSlot.count !== 1) {
+          gridAlreadyFilled = false;
+          break;
+        }
+      } else {
+        if (actualSlot !== null) {
+          gridAlreadyFilled = false;
           break;
         }
       }
-      if (!fits2x2) {
-        messageActions.logMessage('This recipe requires a crafting bench!', 'error');
-        return;
-      }
+    }
+    
+    if (gridAlreadyFilled) {
+      messageActions.logMessage('Grid already contains this recipe!', 'info');
+      return;
     }
     
     // Collect required items
@@ -68,19 +77,11 @@ export const RecipeBook: Component = () => {
       }
     }
     
-    // Clear the appropriate grid first
-    if (isBenchOpen) {
-      // Clear 3x3 crafting bench grid
-      gameActions.updateMachine(gameState.selectedGridIndex!, (machine) => {
-        const bench = machine as CraftingBench;
-        return { ...bench, craftingGrid: Array(9).fill(null) };
-      });
-    } else {
-      // Clear 2x2 inventory crafting grid
-      for (let i = 0; i < 4; i++) {
-        setGameState('inventory', 'craftingGrid', i, null);
-      }
-    }
+    // Clear the 3x3 crafting bench grid first
+    gameActions.updateMachine(gameState.selectedGridIndex!, (machine) => {
+      const bench = machine as CraftingBench;
+      return { ...bench, craftingGrid: Array(9).fill(null) };
+    });
     
     // Remove items from inventory and place in grid
     const itemsToRemove: Record<string, number> = { ...requiredItems };
@@ -112,31 +113,17 @@ export const RecipeBook: Component = () => {
       }
     }
     
-    // Place items in the appropriate grid
-    if (isBenchOpen) {
-      // Fill 3x3 crafting bench grid
-      gameActions.updateMachine(gameState.selectedGridIndex!, (machine) => {
-        const bench = machine as CraftingBench;
-        const newGrid = [...bench.craftingGrid];
-        recipe.shape.forEach((item, index) => {
-          if (item) {
-            newGrid[index] = { type: item, count: 1 };
-          }
-        });
-        return { ...bench, craftingGrid: newGrid };
-      });
-    } else {
-      // Fill 2x2 inventory crafting grid
-      const mapped2x2 = [
-        recipe.shape[0], recipe.shape[1],
-        recipe.shape[3], recipe.shape[4]
-      ];
-      mapped2x2.forEach((item, index) => {
+    // Fill 3x3 crafting bench grid
+    gameActions.updateMachine(gameState.selectedGridIndex!, (machine) => {
+      const bench = machine as CraftingBench;
+      const newGrid = [...bench.craftingGrid];
+      recipe.shape.forEach((item, index) => {
         if (item) {
-          setGameState('inventory', 'craftingGrid', index, { item, count: 1 });
+          newGrid[index] = { type: item, count: 1 };
         }
       });
-    }
+      return { ...bench, craftingGrid: newGrid };
+    });
     
     messageActions.logMessage(`Filled crafting grid with ${itemData[recipe.output].name} recipe.`, 'success');
   };
@@ -159,20 +146,32 @@ export const RecipeBook: Component = () => {
     const isBenchOpen = gameState.selectedGridIndex !== null && 
                        gameState.factoryGrid[gameState.selectedGridIndex]?.type === 'crafting_bench';
     
-    // Can't fill bench recipes without a bench
-    if (recipe.requiresBench && !isBenchOpen) {
+    
+    // Fill button only works with crafting bench
+    if (!isBenchOpen) {
       return false;
     }
-    
-    // Check if recipe fits in 2x2 grid when not in bench
-    if (!isBenchOpen) {
-      for (let i = 0; i < 9; i++) {
-        const row = Math.floor(i / 3);
-        const col = i % 3;
-        if ((row >= 2 || col >= 2) && recipe.shape[i] !== null) {
-          return false; // Recipe too big for 2x2 grid
+
+    // Check if the grid already matches this recipe
+    const bench = gameState.factoryGrid[gameState.selectedGridIndex!] as CraftingBench;
+    let gridAlreadyFilled = true;
+    for (let i = 0; i < 9; i++) {
+      const expectedItem = recipe.shape[i];
+      const actualSlot = bench.craftingGrid[i];
+      if (expectedItem) {
+        if (!actualSlot || actualSlot.type !== expectedItem || actualSlot.count !== 1) {
+          gridAlreadyFilled = false;
+          break;
+        }
+      } else {
+        if (actualSlot !== null) {
+          gridAlreadyFilled = false;
+          break;
         }
       }
+    }
+    if (gridAlreadyFilled) {
+      return false; // Grid already has this recipe
     }
     
     const ingredients = getIngredients(recipeId);
@@ -222,48 +221,70 @@ export const RecipeBook: Component = () => {
     setHoveredRecipe(null);
   };
   
+  const handleRecipeClick = (recipeId: string, e: MouseEvent) => {
+    // Shift-click to fill the recipe
+    if (e.shiftKey) {
+      handleFillGrid(recipeId);
+    }
+  };
+
   return (
     <div class="panel h-full flex flex-col">
-      <h2 class="panel-header">Recipes</h2>
-      <div class="space-y-2 overflow-y-auto flex-1 min-h-0 pr-2">
-        <For each={sortedRecipes()}>
-          {([recipeId, recipe]) => {
-            const fillable = createMemo(() => canFillGrid(recipeId));
-            
-            return (
-              <div 
-                class={`recipe-entry ${fillable() ? '' : 'opacity-50'}`}
-                onMouseEnter={(e) => handleMouseEnter(e, recipeId)}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-              >
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 flex items-center justify-center">
-                    <div class="scale-75 opacity-75">
-                      {itemData[recipe.output] && '🔨'}
-                    </div>
-                  </div>
-                  <div>
-                    <p class="font-medium text-sm">{itemData[recipe.output].name}</p>
-                    <p class="text-xs text-gray-500">
-                      ×{recipe.amount}
-                      <Show when={recipe.requiresBench}>
-                        <span class="text-yellow-500 ml-1">(Bench)</span>
-                      </Show>
-                    </p>
-                  </div>
-                </div>
-                <button 
-                  class={`btn btn-sm ${fillable() ? 'btn-primary' : ''}`}
-                  onClick={() => handleFillGrid(recipeId)}
-                  disabled={!fillable()}
+      <h2 class="panel-header">Recipe Book</h2>
+      <div class="text-xs text-gray-400 mb-3 px-1">
+        Shift-click to fill recipe
+      </div>
+      <div class="flex-1 overflow-y-auto min-h-0">
+        <div class="grid grid-cols-6 gap-1 p-2">
+          <For each={sortedRecipes()}>
+            {([recipeId, recipe]) => {
+              const fillable = createMemo(() => canFillGrid(recipeId));
+              
+              return (
+                <div 
+                  class="relative w-10 h-10 border rounded flex items-center justify-center cursor-pointer transition-colors"
+                  classList={{ 
+                    'opacity-40 border-gray-600 bg-gray-800': !fillable(),
+                    'border-cyan-400 bg-gray-700 hover:bg-gray-600': fillable(),
+                    'border-gray-500 bg-gray-750': !fillable()
+                  }}
+                  style={{ 
+                    "min-width": "40px",
+                    "min-height": "40px"
+                  }}
+                  onMouseEnter={(e) => handleMouseEnter(e, recipeId)}
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+                  onClick={(e) => handleRecipeClick(recipeId, e)}
+                  title={`${itemData[recipe.output].name} (×${recipe.amount})${recipe.requiresBench ? ' - Requires Bench' : ''}`}
                 >
-                  Fill
-                </button>
-              </div>
-            );
-          }}
-        </For>
+                  <Show 
+                    when={iconLibrary[recipe.output]}
+                    fallback={
+                      <div class="w-full h-full flex items-center justify-center text-white text-xs font-bold bg-red-500 rounded">
+                        NO ICON
+                      </div>
+                    }
+                  >
+                    <div class="w-full h-full p-0.5">
+                      {iconLibrary[recipe.output]()}
+                    </div>
+                  </Show>
+                  <Show when={recipe.amount > 1}>
+                    <div class="absolute bottom-0 right-0 bg-gray-900 text-white text-[10px] px-1 rounded-tl leading-3 min-w-[12px] text-center">
+                      {recipe.amount}
+                    </div>
+                  </Show>
+                  <Show when={recipe.requiresBench}>
+                    <div class="absolute top-0 right-0 text-yellow-400 text-[10px] leading-3">
+                      ⚒
+                    </div>
+                  </Show>
+                </div>
+              );
+            }}
+          </For>
+        </div>
       </div>
       
       <Show when={hoveredRecipe()}>
@@ -271,10 +292,18 @@ export const RecipeBook: Component = () => {
           class="tooltip show"
           style={{
             left: `${Math.min(mousePos().x + 15, window.innerWidth - 320)}px`,
-            top: `${Math.min(mousePos().y + 15, window.innerHeight - 200)}px`
+            top: `${Math.min(mousePos().y + 15, window.innerHeight - 200)}px`,
+            'z-index': '1000'
           }}
         >
-          <p class="font-semibold mb-2 text-cyan-400">Required Materials:</p>
+          <div class="font-semibold mb-2 text-cyan-400">
+            {itemData[recipes[hoveredRecipe()!].output].name}
+            <span class="text-gray-400 ml-1">×{recipes[hoveredRecipe()!].amount}</span>
+          </div>
+          <Show when={recipes[hoveredRecipe()!].requiresBench}>
+            <p class="text-xs text-yellow-400 mb-2">⚒ Requires Crafting Bench</p>
+          </Show>
+          <p class="font-medium mb-1 text-white text-sm">Materials Needed:</p>
           <For each={Object.entries(getIngredients(hoveredRecipe()!))}>
             {([item, count]) => {
               // Count available items
@@ -292,12 +321,22 @@ export const RecipeBook: Component = () => {
               
               const hasEnough = available >= count;
               return (
-                <p class={`text-sm ${hasEnough ? 'text-green-400' : 'text-red-400'}`}>
-                  • {itemData[item].name}: {available}/{count}
-                </p>
+                <div class="flex items-center gap-2 text-sm mb-1">
+                  <div class="w-4 h-4 flex items-center justify-center">
+                    {iconLibrary[item] ? iconLibrary[item]() : '?'}
+                  </div>
+                  <span class={hasEnough ? 'text-green-400' : 'text-red-400'}>
+                    {itemData[item].name}: {available}/{count}
+                  </span>
+                </div>
               );
             }}
           </For>
+          <Show when={canFillGrid(hoveredRecipe()!)}>
+            <div class="text-xs text-cyan-300 mt-2 border-t border-gray-600 pt-2">
+              Shift-click to fill crafting grid
+            </div>
+          </Show>
         </div>
       </Show>
     </div>

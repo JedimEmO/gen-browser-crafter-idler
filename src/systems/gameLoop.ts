@@ -1,7 +1,7 @@
 import { gameState, gameActions } from '../stores/gameStore';
 import { itemData } from '../data/items';
-import { smeltingRecipes, cokeOvenRecipes } from '../data/recipes';
-import type { Furnace, CokeOven, Chest, Direction } from '../types';
+import { smeltingRecipes, cokeOvenRecipes, blastFurnaceRecipes } from '../data/recipes';
+import type { Furnace, CokeOven, Chest, Direction, BlastFurnace } from '../types';
 
 function getTileIndexInDirection(index: number, direction: Direction): number {
   if (!direction) return -1;
@@ -259,6 +259,108 @@ function runCokeOven(cokeOven: CokeOven, index: number) {
   }
 }
 
+function runBlastFurnace(blastFurnace: BlastFurnace, index: number) {
+  // Process output first
+  if (blastFurnace.inventory.output && blastFurnace.inventory.output.count > 0) {
+    const outputTileIndex = getTileIndexInDirection(index, blastFurnace.outputSide);
+    const outputTile = outputTileIndex >= 0 ? gameState.factoryGrid[outputTileIndex] : null;
+    if (outputTile && outputTile.type === 'chest') {
+      if (addToChestInventory(outputTileIndex, blastFurnace.inventory.output.type, 1)) {
+        gameActions.updateMachine(index, (m) => {
+          const bf = { ...m, inventory: { ...(m as BlastFurnace).inventory } } as BlastFurnace;
+          if (bf.inventory.output) {
+            const newCount = bf.inventory.output.count - 1;
+            if (newCount <= 0) {
+              bf.inventory.output = null;
+            } else {
+              bf.inventory.output = { ...bf.inventory.output, count: newCount };
+            }
+          }
+          return bf;
+        });
+      }
+    }
+  }
+  
+  // Process steel production
+  if (blastFurnace.isProcessing && blastFurnace.processingItem) {
+    gameActions.updateMachine(index, (m) => {
+      const bf = JSON.parse(JSON.stringify(m)) as BlastFurnace;
+      bf.progress++;
+      // Consume fuel faster than regular furnace (2 units per second = every 10 ticks)
+      if (tickCounter % 10 === 0) {
+        bf.fuelBuffer -= 2;
+      }
+      const recipe = blastFurnaceRecipes[bf.processingItem!];
+      if (bf.progress >= recipe.time) {
+        bf.inventory.output = { type: recipe.output, count: 1 };
+        bf.isProcessing = false;
+        bf.processingItem = undefined;
+        bf.progress = 0;
+      }
+      // Stop processing if out of fuel
+      if (bf.fuelBuffer <= 0) {
+        bf.isProcessing = false;
+      }
+      return bf;
+    });
+  }
+  // Start new processing job if possible
+  else if (blastFurnace.inventory.material && blastFurnace.fuelBuffer > 0 && !blastFurnace.inventory.output) {
+    const itemToProcess = blastFurnace.inventory.material.type;
+    if (blastFurnaceRecipes[itemToProcess]) {
+      gameActions.updateMachine(index, (m) => {
+        const bf = JSON.parse(JSON.stringify(m)) as BlastFurnace;
+        bf.isProcessing = true;
+        bf.processingItem = itemToProcess;
+        bf.progress = 0; // Initialize progress
+        if (bf.inventory.material) {
+          bf.inventory.material.count--;
+          if (bf.inventory.material.count <= 0) {
+            bf.inventory.material = null;
+          }
+        }
+        return bf;
+      });
+    }
+  }
+  // Get new items if needed
+  else {
+    // Pull coal coke from chest if buffer is low
+    if (blastFurnace.fuelBuffer < 100) {
+      const inputTileIndex = getTileIndexInDirection(index, blastFurnace.inputSide);
+      const inputTile = inputTileIndex >= 0 ? gameState.factoryGrid[inputTileIndex] : null;
+      if (inputTile && inputTile.type === 'chest') {
+        if (takeFromChestInventory(inputTileIndex, 'coal_coke', 1)) {
+          gameActions.updateMachine(index, (m) => {
+            const bf = { ...m } as BlastFurnace;
+            bf.fuelBuffer = Math.min(bf.fuelBuffer + (itemData.coal_coke.fuel || 0), bf.maxFuelBuffer);
+            return bf;
+          });
+        }
+      }
+    }
+    
+    // Pull materials from chest
+    if (!blastFurnace.inventory.material) {
+      const inputTileIndex = getTileIndexInDirection(index, blastFurnace.inputSide);
+      const inputTile = inputTileIndex >= 0 ? gameState.factoryGrid[inputTileIndex] : null;
+      if (inputTile && inputTile.type === 'chest') {
+        for (const processableItem in blastFurnaceRecipes) {
+          if (takeFromChestInventory(inputTileIndex, processableItem, 1)) {
+            gameActions.updateMachine(index, (m) => {
+              const bf = { ...m, inventory: { ...(m as BlastFurnace).inventory } } as BlastFurnace;
+              bf.inventory.material = { type: processableItem, count: 1 };
+              return bf;
+            });
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
 function processEnemyMovement() {
   // Only process enemies if in explore mode and not in combat
   if (gameState.currentView !== 'explore' || gameState.combat.active) return;
@@ -323,6 +425,8 @@ export function startGameLoop() {
           runFurnace(tile as Furnace, index);
         } else if (tile.type === 'coke_oven') {
           runCokeOven(tile as CokeOven, index);
+        } else if (tile.type === 'blast_furnace') {
+          runBlastFurnace(tile as BlastFurnace, index);
         }
       }
     });

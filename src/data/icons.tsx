@@ -424,6 +424,251 @@ export const iconLibrary: Record<string, IconComponent> = {
       <rect x="50" y="50" width="30" height="8" rx="2" fill="#9CA3AF" transform="rotate(45 50 50)"/>
     </svg>
   ),
+  hammer: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Wooden handle */}
+      <rect x="35" y="55" width="8" height="35" rx="4" fill="#8B572A" stroke="#654321" stroke-width="1"/>
+      <rect x="36" y="56" width="6" height="33" rx="3" fill="#A0522D"/>
+      
+      {/* Handle wood grain */}
+      <line x1="37" y1="60" x2="37" y2="85" stroke="#654321" stroke-width="0.5" opacity="0.7"/>
+      <line x1="41" y1="62" x2="41" y2="83" stroke="#654321" stroke-width="0.5" opacity="0.6"/>
+      
+      {/* Handle wrap/grip */}
+      <rect x="35" y="70" width="8" height="3" fill="#654321" opacity="0.8"/>
+      <rect x="35" y="75" width="8" height="3" fill="#654321" opacity="0.8"/>
+      
+      {/* Main hammer head - rectangular metal block */}
+      <rect x="25" y="35" width="28" height="16" rx="2" fill="#9CA3AF" stroke="#6B7280" stroke-width="2"/>
+      <rect x="27" y="37" width="24" height="12" rx="1" fill="#D1D5DB"/>
+      
+      {/* Hammer head highlights and depth */}
+      <rect x="27" y="37" width="24" height="4" rx="1" fill="#E5E7EB"/>
+      <rect x="27" y="45" width="24" height="2" fill="#6B7280" opacity="0.6"/>
+      
+      {/* Metal texture lines */}
+      <line x1="30" y1="39" x2="48" y2="39" stroke="#9CA3AF" stroke-width="0.5"/>
+      <line x1="30" y1="41" x2="48" y2="41" stroke="#9CA3AF" stroke-width="0.5"/>
+      <line x1="30" y1="45" x2="48" y2="45" stroke="#9CA3AF" stroke-width="0.5"/>
+      
+      {/* Handle connection - metal ferrule */}
+      <rect x="34" y="48" width="10" height="8" rx="1" fill="#6B7280" stroke="#4B5563" stroke-width="1"/>
+      <rect x="35" y="49" width="8" height="6" rx="0.5" fill="#9CA3AF"/>
+      
+      {/* Connection rivets */}
+      <circle cx="37" cy="52" r="0.8" fill="#4B5563"/>
+      <circle cx="41" cy="52" r="0.8" fill="#4B5563"/>
+      
+      {/* Strike marks on hammer face */}
+      <circle cx="45" cy="43" r="1.5" fill="#9CA3AF" opacity="0.8"/>
+      <circle cx="42" cy="41" r="1" fill="#9CA3AF" opacity="0.6"/>
+      
+      {/* Shadow under head */}
+      <ellipse cx="39" cy="52" rx="12" ry="2" fill="#6B7280" opacity="0.3"/>
+    </svg>
+  ),
+  iron_plate: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Main plate body */}
+      <rect x="15" y="35" width="70" height="30" rx="2" fill="#E5E7EB" stroke="#9CA3AF" stroke-width="2"/>
+      <rect x="18" y="38" width="64" height="24" rx="1" fill="#F3F4F6"/>
+      
+      {/* Metal surface texture */}
+      <rect x="20" y="40" width="60" height="20" rx="1" fill="#D1D5DB"/>
+      
+      {/* Brushed metal effect lines */}
+      <line x1="22" y1="43" x2="78" y2="43" stroke="#9CA3AF" stroke-width="0.5" opacity="0.6"/>
+      <line x1="22" y1="47" x2="78" y2="47" stroke="#9CA3AF" stroke-width="0.5" opacity="0.6"/>
+      <line x1="22" y1="51" x2="78" y2="51" stroke="#9CA3AF" stroke-width="0.5" opacity="0.6"/>
+      <line x1="22" y1="55" x2="78" y2="55" stroke="#9CA3AF" stroke-width="0.5" opacity="0.6"/>
+      <line x1="22" y1="57" x2="78" y2="57" stroke="#9CA3AF" stroke-width="0.5" opacity="0.6"/>
+      
+      {/* Corner rivet holes */}
+      <circle cx="25" cy="42" r="3" fill="#6B7280" stroke="#4B5563" stroke-width="1"/>
+      <circle cx="75" cy="42" r="3" fill="#6B7280" stroke="#4B5563" stroke-width="1"/>
+      <circle cx="25" cy="58" r="3" fill="#6B7280" stroke="#4B5563" stroke-width="1"/>
+      <circle cx="75" cy="58" r="3" fill="#6B7280" stroke="#4B5563" stroke-width="1"/>
+      
+      {/* Inner rivet holes */}
+      <circle cx="25" cy="42" r="1.5" fill="#374151"/>
+      <circle cx="75" cy="42" r="1.5" fill="#374151"/>
+      <circle cx="25" cy="58" r="1.5" fill="#374151"/>
+      <circle cx="75" cy="58" r="1.5" fill="#374151"/>
+      
+      {/* Center mounting holes */}
+      <circle cx="40" cy="50" r="2" fill="#6B7280" stroke="#4B5563" stroke-width="0.5"/>
+      <circle cx="60" cy="50" r="2" fill="#6B7280" stroke="#4B5563" stroke-width="0.5"/>
+      <circle cx="40" cy="50" r="1" fill="#374151"/>
+      <circle cx="60" cy="50" r="1" fill="#374151"/>
+      
+      {/* Top highlight */}
+      <rect x="18" y="36" width="64" height="4" rx="1" fill="#F9FAFB" opacity="0.8"/>
+      
+      {/* Bottom shadow */}
+      <rect x="18" y="60" width="64" height="3" rx="1" fill="#9CA3AF" opacity="0.6"/>
+      
+      {/* Edge bevels */}
+      <line x1="15" y1="37" x2="85" y2="37" stroke="#F9FAFB" stroke-width="1" opacity="0.8"/>
+      <line x1="15" y1="63" x2="85" y2="63" stroke="#6B7280" stroke-width="1" opacity="0.7"/>
+    </svg>
+  ),
+  steel_ingot: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Main ingot body - darker blue-gray steel */}
+      <rect x="20" y="35" width="60" height="30" rx="3" fill="#475569" stroke="#334155" stroke-width="2"/>
+      <rect x="23" y="38" width="54" height="24" rx="2" fill="#64748B"/>
+      
+      {/* Polished steel surface with blue tint */}
+      <rect x="25" y="40" width="50" height="20" rx="2" fill="#7C8E9F"/>
+      
+      {/* Steel shine highlight on top */}
+      <rect x="25" y="40" width="50" height="6" rx="2" fill="#9DB2C5" opacity="0.9"/>
+      
+      {/* Polished metal reflection lines */}
+      <line x1="27" y1="43" x2="73" y2="43" stroke="#B4C7DB" stroke-width="1" opacity="0.8"/>
+      <line x1="27" y1="47" x2="73" y2="47" stroke="#94A3B8" stroke-width="0.8" opacity="0.7"/>
+      <line x1="27" y1="51" x2="73" y2="51" stroke="#94A3B8" stroke-width="0.8" opacity="0.7"/>
+      <line x1="27" y1="55" x2="73" y2="55" stroke="#94A3B8" stroke-width="0.8" opacity="0.7"/>
+      <line x1="27" y1="57" x2="73" y2="57" stroke="#64748B" stroke-width="0.6" opacity="0.6"/>
+      
+      {/* Steel ingot characteristic marks */}
+      <rect x="30" y="44" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+      <rect x="36" y="44" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+      <rect x="42" y="44" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+      <rect x="48" y="44" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+      <rect x="54" y="44" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+      <rect x="60" y="44" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+      <rect x="66" y="44" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+      
+      {/* Sleek bottom shadow */}
+      <rect x="23" y="58" width="54" height="4" rx="2" fill="#1E293B" opacity="0.7"/>
+      
+      {/* Steel edge highlights */}
+      <line x1="20" y1="37" x2="80" y2="37" stroke="#B4C7DB" stroke-width="1.5" opacity="0.9"/>
+      <line x1="22" y1="39" x2="78" y2="39" stroke="#9DB2C5" stroke-width="1" opacity="0.8"/>
+      
+      {/* Bottom edge definition */}
+      <line x1="20" y1="63" x2="80" y2="63" stroke="#1E293B" stroke-width="1.5" opacity="0.8"/>
+      
+      {/* Corner chamfers for industrial look */}
+      <path d="M20 38 L23 35 L23 38 Z" fill="#334155"/>
+      <path d="M80 38 L77 35 L77 38 Z" fill="#334155"/>
+      <path d="M20 62 L23 65 L23 62 Z" fill="#334155"/>
+      <path d="M80 62 L77 65 L77 62 Z" fill="#334155"/>
+    </svg>
+  ),
+  blast_furnace: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Shadow */}
+      <ellipse cx="52" cy="94" rx="42" ry="4" fill="#111827" opacity="0.4"/>
+      
+      {/* Main blast furnace body - tall and imposing */}
+      <rect x="15" y="20" width="70" height="70" rx="5" fill="#991B1B" stroke="#7F1D1D" stroke-width="2"/>
+      <rect x="17" y="22" width="66" height="66" rx="4" fill="#DC2626"/>
+      
+      {/* Wide base foundation */}
+      <rect x="10" y="75" width="80" height="15" rx="3" fill="#4B5563" stroke="#374151" stroke-width="2"/>
+      <rect x="12" y="77" width="76" height="11" rx="2" fill="#6B7280"/>
+      
+      {/* Brick pattern on main body */}
+      <rect x="20" y="25" width="60" height="10" fill="#EF4444"/>
+      <rect x="20" y="40" width="60" height="10" fill="#EF4444"/>
+      <rect x="20" y="55" width="60" height="10" fill="#EF4444"/>
+      <rect x="20" y="70" width="60" height="10" fill="#EF4444"/>
+      
+      {/* Brick divisions - staggered pattern */}
+      <line x1="35" y1="25" x2="35" y2="35" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="50" y1="25" x2="50" y2="35" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="65" y1="25" x2="65" y2="35" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="27" y1="40" x2="27" y2="50" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="42" y1="40" x2="42" y2="50" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="57" y1="40" x2="57" y2="50" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="72" y1="40" x2="72" y2="50" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="35" y1="55" x2="35" y2="65" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="50" y1="55" x2="50" y2="65" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="65" y1="55" x2="65" y2="65" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="27" y1="70" x2="27" y2="80" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="42" y1="70" x2="42" y2="80" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="57" y1="70" x2="57" y2="80" stroke="#991B1B" stroke-width="1.5"/>
+      <line x1="72" y1="70" x2="72" y2="80" stroke="#991B1B" stroke-width="1.5"/>
+      
+      {/* Metal reinforcement bands */}
+      <rect x="12" y="30" width="76" height="4" rx="2" fill="#4B5563"/>
+      <rect x="12" y="50" width="76" height="4" rx="2" fill="#4B5563"/>
+      <rect x="12" y="70" width="76" height="4" rx="2" fill="#4B5563"/>
+      
+      {/* Rivets on metal bands */}
+      <circle cx="20" cy="32" r="1.5" fill="#9CA3AF"/>
+      <circle cx="35" cy="32" r="1.5" fill="#9CA3AF"/>
+      <circle cx="50" cy="32" r="1.5" fill="#9CA3AF"/>
+      <circle cx="65" cy="32" r="1.5" fill="#9CA3AF"/>
+      <circle cx="80" cy="32" r="1.5" fill="#9CA3AF"/>
+      <circle cx="20" cy="52" r="1.5" fill="#9CA3AF"/>
+      <circle cx="80" cy="52" r="1.5" fill="#9CA3AF"/>
+      <circle cx="20" cy="72" r="1.5" fill="#9CA3AF"/>
+      <circle cx="80" cy="72" r="1.5" fill="#9CA3AF"/>
+      
+      {/* Large furnace opening */}
+      <rect x="30" y="45" width="40" height="30" rx="4" fill="#000000" stroke="#111827" stroke-width="2"/>
+      <rect x="32" y="47" width="36" height="26" rx="3" fill="#1F2937"/>
+      
+      {/* Intense heat glow - much brighter than regular furnace */}
+      <ellipse cx="50" cy="60" rx="16" ry="12" fill="#DC2626" opacity="0.9"/>
+      <ellipse cx="50" cy="58" rx="12" ry="9" fill="#EF4444"/>
+      <ellipse cx="50" cy="56" rx="8" ry="6" fill="#F97316"/>
+      <ellipse cx="50" cy="54" rx="5" ry="4" fill="#FED7AA"/>
+      
+      {/* Molten metal effect */}
+      <ellipse cx="50" cy="68" rx="14" ry="4" fill="#F97316" opacity="0.8"/>
+      <circle cx="45" cy="68" r="2" fill="#DC2626"/>
+      <circle cx="55" cy="68" r="1.5" fill="#EF4444"/>
+      <circle cx="50" cy="70" r="1" fill="#F97316"/>
+      
+      {/* Tall chimney stack */}
+      <rect x="43" y="8" width="14" height="18" rx="2" fill="#4B5563" stroke="#374151" stroke-width="2"/>
+      <rect x="45" y="10" width="10" height="14" rx="1" fill="#6B7280"/>
+      
+      {/* Chimney cap */}
+      <rect x="40" y="6" width="20" height="4" rx="2" fill="#9CA3AF"/>
+      <rect x="42" y="8" width="16" height="2" rx="1" fill="#D1D5DB"/>
+      
+      {/* Heavy smoke from chimney */}
+      <ellipse cx="50" cy="4" rx="6" ry="2" fill="#6B7280" opacity="0.6"/>
+      <ellipse cx="52" cy="1" rx="4" ry="1.5" fill="#6B7280" opacity="0.4"/>
+      <ellipse cx="48" cy="-1" rx="3" ry="1" fill="#6B7280" opacity="0.3"/>
+      
+      {/* Heat shimmer from top */}
+      <path d="M25 18 Q27 16 29 18" stroke="#F97316" stroke-width="0.8" opacity="0.6"/>
+      <path d="M35 16 Q37 14 39 16" stroke="#F97316" stroke-width="0.8" opacity="0.6"/>
+      <path d="M61 16 Q63 14 65 16" stroke="#F97316" stroke-width="0.8" opacity="0.6"/>
+      <path d="M71 18 Q73 16 75 18" stroke="#F97316" stroke-width="0.8" opacity="0.6"/>
+      
+      {/* Industrial pipes on sides */}
+      <rect x="8" y="35" width="6" height="25" rx="3" fill="#9CA3AF" stroke="#6B7280" stroke-width="1"/>
+      <rect x="86" y="35" width="6" height="25" rx="3" fill="#9CA3AF" stroke="#6B7280" stroke-width="1"/>
+      <circle cx="11" cy="40" r="2" fill="#4B5563"/>
+      <circle cx="89" cy="40" r="2" fill="#4B5563"/>
+      <circle cx="11" cy="55" r="2" fill="#4B5563"/>
+      <circle cx="89" cy="55" r="2" fill="#4B5563"/>
+      
+      {/* Temperature gauges */}
+      <circle cx="22" cy="38" r="3" fill="#374151"/>
+      <circle cx="22" cy="38" r="2.5" fill="#1F2937"/>
+      <circle cx="22" cy="38" r="1" fill="#DC2626"/>
+      <circle cx="78" cy="38" r="3" fill="#374151"/>
+      <circle cx="78" cy="38" r="2.5" fill="#1F2937"/>
+      <circle cx="78" cy="38" r="1" fill="#EF4444"/>
+      
+      {/* Control valves */}
+      <rect x="75" y="62" width="12" height="8" rx="2" fill="#4B5563"/>
+      <rect x="77" y="64" width="8" height="4" rx="1" fill="#6B7280"/>
+      <circle cx="81" cy="66" r="1.5" fill="#374151"/>
+      
+      {/* Inspection window */}
+      <rect x="70" y="48" width="8" height="8" rx="1" fill="#111827" stroke="#000000" stroke-width="1"/>
+      <circle cx="74" cy="52" r="2" fill="#F97316" opacity="0.8"/>
+    </svg>
+  ),
   coke_oven: () => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Shadow */}

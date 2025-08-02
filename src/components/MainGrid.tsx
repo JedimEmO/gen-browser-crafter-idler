@@ -172,6 +172,7 @@ export const MainGrid: Component = () => {
     const machine = gameState.factoryGrid[index];
     if (machine?.type === 'crafting_bench') {
       setCraftingBenchIndex(index);
+      gameActions.selectGridIndex(index); // Also select the crafting bench
     } else {
       handleFactoryGridClick(index);
     }

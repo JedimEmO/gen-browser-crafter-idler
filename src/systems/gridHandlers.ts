@@ -2,8 +2,8 @@ import { gameState, gameActions } from '../stores/gameStore';
 import { messageActions } from '../stores/messageStore';
 import { itemData } from '../data/items';
 import { worldResourceData } from '../data/biomes';
-import { smeltingRecipes, cokeOvenRecipes } from '../data/recipes';
-import type { Furnace, CokeOven, Chest, Machine, CraftingBench } from '../types';
+import { smeltingRecipes, cokeOvenRecipes, blastFurnaceRecipes } from '../data/recipes';
+import type { Furnace, CokeOven, Chest, Machine, CraftingBench, BlastFurnace } from '../types';
 
 export function handleFactoryGridClick(index: number) {
   const currentTile = gameState.factoryGrid[index];
@@ -72,6 +72,17 @@ export function handleFactoryGridClick(index: number) {
             craftingGrid: Array(9).fill(null),
             outputSlot: null
           } as CraftingBench;
+        } else if (type === 'blast_furnace') {
+          newMachine = {
+            type: 'blast_furnace',
+            inputSide: 'bottom',
+            outputSide: 'top',
+            fuelBuffer: 0,
+            maxFuelBuffer: 200, // More capacity than regular furnace
+            progress: 0,
+            isProcessing: false,
+            inventory: { material: null, output: null }
+          } as BlastFurnace;
         } else {
           return;
         }
@@ -80,7 +91,7 @@ export function handleFactoryGridClick(index: number) {
       }
     }
     // Inserting item into machine
-    else if (currentTile && (currentTile.type === 'furnace' || currentTile.type === 'coke_oven')) {
+    else if (currentTile && (currentTile.type === 'furnace' || currentTile.type === 'coke_oven' || currentTile.type === 'blast_furnace')) {
       const item = selectedItem;
       const machine = currentTile;
       
@@ -121,6 +132,36 @@ export function handleFactoryGridClick(index: number) {
                 c.inventory.input.count++;
               }
               return c;
+            });
+          }
+        }
+      }
+      
+      if (machine.type === 'blast_furnace') {
+        const blastFurnace = machine as BlastFurnace;
+        // Handle coal coke as fuel
+        if (item === 'coal_coke' && blastFurnace.fuelBuffer < blastFurnace.maxFuelBuffer) {
+          if (gameActions.removeFromInventory(item, 1)) {
+            gameActions.updateMachine(index, (m) => {
+              const bf = { ...m } as BlastFurnace;
+              bf.fuelBuffer = Math.min(bf.fuelBuffer + (itemData.coal_coke.fuel || 0), bf.maxFuelBuffer);
+              return bf;
+            });
+          }
+        }
+        // Handle material input (iron ingot)
+        else if (blastFurnaceRecipes[item] && (!blastFurnace.inventory.material || blastFurnace.inventory.material.type === item)) {
+          if (gameActions.removeFromInventory(item, 1)) {
+            gameActions.updateMachine(index, (m) => {
+              const bf = { ...m } as BlastFurnace;
+              const newInventory = { ...bf.inventory };
+              if (!newInventory.material) {
+                newInventory.material = { type: item, count: 1 };
+              } else {
+                newInventory.material = { ...newInventory.material, count: newInventory.material.count + 1 };
+              }
+              bf.inventory = newInventory;
+              return bf;
             });
           }
         }
