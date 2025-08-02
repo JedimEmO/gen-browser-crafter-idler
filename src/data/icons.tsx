@@ -85,6 +85,95 @@ export const iconLibrary: Record<string, IconComponent> = {
   goblin: GoblinIcon,
   wolf: WolfIcon,
   
+  // Item icons
+  stick: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="45" y="10" width="10" height="80" rx="5" fill="#8B572A"/>
+      <rect x="47" y="10" width="6" height="80" rx="3" fill="#A0522D"/>
+      <line x1="50" y1="15" x2="50" y2="85" stroke="#654321" stroke-width="1"/>
+      <line x1="48" y1="30" x2="48" y2="70" stroke="#654321" stroke-width="0.5"/>
+      <line x1="52" y1="40" x2="52" y2="60" stroke="#654321" stroke-width="0.5"/>
+    </svg>
+  ),
+  iron_ingot: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="35" width="60" height="30" rx="3" fill="#E5E7EB" stroke="#9CA3AF" stroke-width="2"/>
+      <rect x="25" y="40" width="50" height="20" rx="2" fill="#F3F4F6"/>
+      <line x1="25" y1="45" x2="75" y2="45" stroke="#D1D5DB" stroke-width="1"/>
+      <line x1="25" y1="50" x2="75" y2="50" stroke="#D1D5DB" stroke-width="1"/>
+      <line x1="25" y1="55" x2="75" y2="55" stroke="#D1D5DB" stroke-width="1"/>
+    </svg>
+  ),
+  gear: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(50, 50)">
+        {/* Gear teeth */}
+        <rect x="-5" y="-30" width="10" height="15" fill="#6B7280"/>
+        <rect x="-5" y="15" width="10" height="15" fill="#6B7280"/>
+        <rect x="-30" y="-5" width="15" height="10" fill="#6B7280"/>
+        <rect x="15" y="-5" width="15" height="10" fill="#6B7280"/>
+        <rect x="-25" y="-25" width="12" height="12" fill="#6B7280" transform="rotate(45 -19 -19)"/>
+        <rect x="13" y="-25" width="12" height="12" fill="#6B7280" transform="rotate(45 19 -19)"/>
+        <rect x="-25" y="13" width="12" height="12" fill="#6B7280" transform="rotate(45 -19 19)"/>
+        <rect x="13" y="13" width="12" height="12" fill="#6B7280" transform="rotate(45 19 19)"/>
+        {/* Center circle */}
+        <circle cx="0" cy="0" r="20" fill="#9CA3AF" stroke="#374151" stroke-width="2"/>
+        <circle cx="0" cy="0" r="8" fill="#374151"/>
+      </g>
+    </svg>
+  ),
+  sand: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="30" fill="#FDE047"/>
+      <circle cx="45" cy="45" r="25" fill="#FBBF24"/>
+      <circle cx="40" cy="40" r="2" fill="#F59E0B"/>
+      <circle cx="55" cy="45" r="1.5" fill="#F59E0B"/>
+      <circle cx="48" cy="52" r="1" fill="#F59E0B"/>
+      <circle cx="60" cy="55" r="1.5" fill="#F59E0B"/>
+      <circle cx="42" cy="58" r="1" fill="#F59E0B"/>
+    </svg>
+  ),
+  clay: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="50" rx="30" ry="25" fill="#A78BFA"/>
+      <ellipse cx="50" cy="48" rx="25" ry="20" fill="#C4B5FD"/>
+      <path d="M30 45 Q50 50 70 45" stroke="#8B5CF6" stroke-width="2" fill="none"/>
+      <path d="M35 55 Q50 60 65 55" stroke="#8B5CF6" stroke-width="1.5" fill="none"/>
+    </svg>
+  ),
+  brick_mixture: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="55" rx="30" ry="20" fill="#92400E"/>
+      <ellipse cx="50" cy="52" rx="25" ry="15" fill="#A16207"/>
+      <circle cx="40" cy="50" r="3" fill="#FBBF24" opacity="0.7"/>
+      <circle cx="60" cy="53" r="2.5" fill="#FBBF24" opacity="0.7"/>
+      <circle cx="48" cy="56" r="2" fill="#FBBF24" opacity="0.7"/>
+      <path d="M35 52 Q45 55 55 52" stroke="#A78BFA" stroke-width="2" opacity="0.6" fill="none"/>
+    </svg>
+  ),
+  brick: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="30" width="60" height="40" rx="2" fill="#DC2626" stroke="#991B1B" stroke-width="2"/>
+      <rect x="25" y="35" width="50" height="30" rx="1" fill="#EF4444"/>
+      {/* Mortar lines */}
+      <line x1="25" y1="50" x2="75" y2="50" stroke="#991B1B" stroke-width="1"/>
+      <line x1="50" y1="35" x2="50" y2="50" stroke="#991B1B" stroke-width="1"/>
+      <line x1="40" y1="50" x2="40" y2="65" stroke="#991B1B" stroke-width="1"/>
+      <line x1="60" y1="50" x2="60" y2="65" stroke="#991B1B" stroke-width="1"/>
+    </svg>
+  ),
+  coal_coke: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="25" y="25" width="50" height="50" rx="5" fill="#0F172A" stroke="#1E293B" stroke-width="2"/>
+      <rect x="30" y="30" width="40" height="40" rx="3" fill="#1E293B"/>
+      {/* Grid pattern */}
+      <rect x="35" y="35" width="12" height="12" fill="#334155"/>
+      <rect x="53" y="35" width="12" height="12" fill="#334155"/>
+      <rect x="35" y="53" width="12" height="12" fill="#334155"/>
+      <rect x="53" y="53" width="12" height="12" fill="#334155"/>
+    </svg>
+  ),
+  
   wood: () => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="20" y="10" width="60" height="80" rx="10" fill="#8B572A"/>
@@ -157,22 +246,108 @@ export const iconLibrary: Record<string, IconComponent> = {
   ),
   crafting_bench: () => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="20" y="30" width="60" height="40" fill="#8B4513" stroke="#654321" stroke-width="2"/>
-      <rect x="25" y="35" width="50" height="30" fill="#A0522D"/>
-      <line x1="40" y1="35" x2="40" y2="65" stroke="#654321" stroke-width="1"/>
-      <line x1="60" y1="35" x2="60" y2="65" stroke="#654321" stroke-width="1"/>
-      <line x1="25" y1="45" x2="75" y2="45" stroke="#654321" stroke-width="1"/>
-      <line x1="25" y1="55" x2="75" y2="55" stroke="#654321" stroke-width="1"/>
-      <rect x="30" y="65" width="10" height="20" fill="#8B4513"/>
-      <rect x="60" y="65" width="10" height="20" fill="#8B4513"/>
+      {/* Shadow */}
+      <ellipse cx="52" cy="88" rx="40" ry="8" fill="#1F2937" opacity="0.3"/>
+      
+      {/* Table legs */}
+      <rect x="25" y="65" width="8" height="20" fill="#654321"/>
+      <rect x="67" y="65" width="8" height="20" fill="#654321"/>
+      <rect x="25" y="65" width="8" height="3" fill="#8B572A"/>
+      <rect x="67" y="65" width="8" height="3" fill="#8B572A"/>
+      
+      {/* Main table surface */}
+      <rect x="15" y="50" width="70" height="20" rx="2" fill="#8B572A" stroke="#654321" stroke-width="2"/>
+      <rect x="18" y="53" width="64" height="14" rx="1" fill="#A0522D"/>
+      
+      {/* Wood grain */}
+      <path d="M20 58 Q35 60 50 58 Q65 56 80 58" stroke="#654321" stroke-width="1" opacity="0.6"/>
+      <path d="M20 62 Q40 64 60 62 Q75 60 80 62" stroke="#654321" stroke-width="0.8" opacity="0.5"/>
+      
+      {/* Crafting grid surface */}
+      <rect x="25" y="30" width="30" height="30" rx="2" fill="#9CA3AF" stroke="#6B7280" stroke-width="1.5"/>
+      <rect x="27" y="32" width="26" height="26" rx="1" fill="#D1D5DB"/>
+      
+      {/* 3x3 grid lines */}
+      <line x1="35" y1="32" x2="35" y2="58" stroke="#6B7280" stroke-width="1"/>
+      <line x1="45" y1="32" x2="45" y2="58" stroke="#6B7280" stroke-width="1"/>
+      <line x1="27" y1="40" x2="53" y2="40" stroke="#6B7280" stroke-width="1"/>
+      <line x1="27" y1="50" x2="53" y2="50" stroke="#6B7280" stroke-width="1"/>
+      
+      {/* Tools on the side */}
+      <rect x="60" y="32" width="2" height="15" rx="1" fill="#8B572A"/>
+      <rect x="58" y="30" width="6" height="4" rx="1" fill="#6B7280"/>
+      
+      <rect x="65" y="35" width="12" height="2" rx="1" fill="#8B572A"/>
+      <rect x="75" y="33" width="4" height="6" rx="1" fill="#6B7280"/>
+      
+      {/* Small parts/components */}
+      <circle cx="70" cy="45" r="2" fill="#4B5563"/>
+      <circle cx="75" cy="48" r="1.5" fill="#6B7280"/>
+      <rect x="68" y="52" width="8" height="3" rx="1" fill="#A0522D"/>
+      
+      {/* Highlight on table edge */}
+      <rect x="15" y="50" width="70" height="3" rx="2" fill="#D1914D" opacity="0.7"/>
     </svg>
   ),
   furnace: () => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="20" y="20" width="60" height="60" fill="#4B5563" stroke="#374151" stroke-width="2"/>
-      <rect x="30" y="30" width="40" height="30" fill="#1F2937"/>
-      <rect x="35" y="40" width="30" height="15" fill="#F97316"/>
-      <rect x="40" y="65" width="20" height="10" fill="#374151"/>
+      {/* Shadow */}
+      <ellipse cx="52" cy="92" rx="35" ry="6" fill="#111827" opacity="0.4"/>
+      
+      {/* Main furnace body */}
+      <rect x="20" y="25" width="60" height="60" rx="3" fill="#4B5563" stroke="#374151" stroke-width="2"/>
+      <rect x="22" y="27" width="56" height="56" rx="2" fill="#6B7280"/>
+      
+      {/* Metal panels with rivets */}
+      <rect x="25" y="30" width="50" height="20" fill="#9CA3AF"/>
+      <rect x="25" y="55" width="50" height="25" fill="#9CA3AF"/>
+      
+      {/* Rivets */}
+      <circle cx="30" cy="35" r="1.5" fill="#374151"/>
+      <circle cx="70" cy="35" r="1.5" fill="#374151"/>
+      <circle cx="30" cy="45" r="1.5" fill="#374151"/>
+      <circle cx="70" cy="45" r="1.5" fill="#374151"/>
+      <circle cx="30" cy="65" r="1.5" fill="#374151"/>
+      <circle cx="70" cy="65" r="1.5" fill="#374151"/>
+      <circle cx="30" cy="75" r="1.5" fill="#374151"/>
+      <circle cx="70" cy="75" r="1.5" fill="#374151"/>
+      
+      {/* Furnace door */}
+      <rect x="35" y="35" width="30" height="25" rx="2" fill="#1F2937" stroke="#111827" stroke-width="1.5"/>
+      <rect x="37" y="37" width="26" height="21" rx="1" fill="#374151"/>
+      
+      {/* Door handle */}
+      <rect x="60" y="46" width="6" height="3" rx="1.5" fill="#9CA3AF"/>
+      <circle cx="63" cy="47.5" r="1" fill="#4B5563"/>
+      
+      {/* Fire glow inside */}
+      <ellipse cx="50" cy="47" rx="10" ry="8" fill="#F97316" opacity="0.8"/>
+      <ellipse cx="50" cy="45" rx="6" ry="5" fill="#FB923C"/>
+      <ellipse cx="50" cy="44" rx="3" ry="3" fill="#FED7AA"/>
+      
+      {/* Flame effects */}
+      <path d="M45 44 Q47 40 49 44 Q51 38 53 44" stroke="#F97316" stroke-width="1.5" fill="none" opacity="0.7"/>
+      <path d="M47 46 Q49 42 51 46" stroke="#FB923C" stroke-width="1" fill="none" opacity="0.8"/>
+      
+      {/* Heat vents on top */}
+      <rect x="35" y="25" width="4" height="8" rx="2" fill="#111827"/>
+      <rect x="42" y="25" width="4" height="8" rx="2" fill="#111827"/>
+      <rect x="54" y="25" width="4" height="8" rx="2" fill="#111827"/>
+      <rect x="61" y="25" width="4" height="8" rx="2" fill="#111827"/>
+      
+      {/* Heat shimmer effect */}
+      <path d="M37 28 Q40 26 43 28" stroke="#F97316" stroke-width="0.5" opacity="0.6"/>
+      <path d="M56 28 Q59 26 62 28" stroke="#F97316" stroke-width="0.5" opacity="0.6"/>
+      
+      {/* Control panel */}
+      <rect x="25" y="65" width="15" height="10" rx="1" fill="#4B5563"/>
+      <circle cx="30" cy="70" r="2" fill="#1F2937"/>
+      <circle cx="35" cy="70" r="2" fill="#1F2937"/>
+      <circle cx="32.5" cy="70" r="0.5" fill="#DC2626"/>
+      
+      {/* Base platform */}
+      <rect x="15" y="80" width="70" height="5" rx="2" fill="#374151"/>
+      <rect x="15" y="80" width="70" height="2" rx="2" fill="#4B5563"/>
     </svg>
   ),
   pickaxe: () => (
@@ -189,9 +364,58 @@ export const iconLibrary: Record<string, IconComponent> = {
   ),
   chest: () => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="20" y="40" width="60" height="40" fill="#8B572A" stroke="#654321" stroke-width="2"/>
-      <rect x="20" y="30" width="60" height="15" rx="7" fill="#A0522D" stroke="#654321" stroke-width="2"/>
-      <rect x="45" y="35" width="10" height="15" fill="#FFD700" stroke="#FFA500" stroke-width="1"/>
+      {/* Shadow */}
+      <ellipse cx="52" cy="88" rx="35" ry="6" fill="#1F2937" opacity="0.3"/>
+      
+      {/* Main chest body */}
+      <rect x="20" y="40" width="60" height="40" rx="2" fill="#8B572A" stroke="#654321" stroke-width="2"/>
+      <rect x="22" y="42" width="56" height="36" rx="1" fill="#A0522D"/>
+      
+      {/* Wood grain */}
+      <path d="M25 50 Q40 52 55 50 Q70 48 75 50" stroke="#654321" stroke-width="1" opacity="0.6"/>
+      <path d="M25 60 Q35 62 45 60 Q55 58 65 60 Q75 62 75 60" stroke="#654321" stroke-width="0.8" opacity="0.5"/>
+      <path d="M25 70 Q40 72 55 70 Q70 68 75 70" stroke="#654321" stroke-width="1" opacity="0.6"/>
+      
+      {/* Chest lid */}
+      <rect x="20" y="30" width="60" height="18" rx="8" fill="#A0522D" stroke="#654321" stroke-width="2"/>
+      <rect x="22" y="32" width="56" height="14" rx="6" fill="#D1914D"/>
+      
+      {/* Lid wood grain */}
+      <path d="M25 37 Q40 39 55 37 Q70 35 75 37" stroke="#654321" stroke-width="0.8" opacity="0.6"/>
+      <path d="M25 42 Q50 44 75 42" stroke="#654321" stroke-width="0.6" opacity="0.5"/>
+      
+      {/* Metal reinforcements */}
+      <rect x="18" y="38" width="64" height="4" rx="2" fill="#6B7280"/>
+      <rect x="18" y="76" width="64" height="4" rx="2" fill="#6B7280"/>
+      <rect x="18" y="30" width="4" height="50" rx="2" fill="#6B7280"/>
+      <rect x="78" y="30" width="4" height="50" rx="2" fill="#6B7280"/>
+      
+      {/* Corner reinforcements */}
+      <rect x="16" y="28" width="8" height="8" rx="2" fill="#4B5563"/>
+      <rect x="76" y="28" width="8" height="8" rx="2" fill="#4B5563"/>
+      <rect x="16" y="76" width="8" height="8" rx="2" fill="#4B5563"/>
+      <rect x="76" y="76" width="8" height="8" rx="2" fill="#4B5563"/>
+      
+      {/* Rivets on metal */}
+      <circle cx="20" cy="40" r="1" fill="#374151"/>
+      <circle cx="80" cy="40" r="1" fill="#374151"/>
+      <circle cx="20" cy="78" r="1" fill="#374151"/>
+      <circle cx="80" cy="78" r="1" fill="#374151"/>
+      
+      {/* Lock mechanism */}
+      <rect x="45" y="35" width="10" height="18" rx="2" fill="#4B5563" stroke="#374151" stroke-width="1"/>
+      <rect x="47" y="37" width="6" height="14" rx="1" fill="#6B7280"/>
+      
+      {/* Keyhole */}
+      <circle cx="50" cy="44" r="2.5" fill="#1F2937"/>
+      <rect x="49" y="44" width="2" height="6" fill="#1F2937"/>
+      
+      {/* Lock highlight */}
+      <rect x="47" y="37" width="6" height="3" rx="1" fill="#9CA3AF" opacity="0.7"/>
+      
+      {/* Chest handle/latch */}
+      <ellipse cx="50" cy="32" rx="8" ry="3" fill="#6B7280"/>
+      <ellipse cx="50" cy="31" rx="6" ry="2" fill="#9CA3AF"/>
     </svg>
   ),
   wrench: () => (
@@ -202,10 +426,72 @@ export const iconLibrary: Record<string, IconComponent> = {
   ),
   coke_oven: () => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="20" y="20" width="60" height="60" fill="#DC2626" stroke="#991B1B" stroke-width="2"/>
-      <rect x="30" y="30" width="40" height="40" fill="#7F1D1D"/>
-      <rect x="35" y="35" width="30" height="30" fill="#991B1B"/>
-      <circle cx="50" cy="50" r="10" fill="#F97316"/>
+      {/* Shadow */}
+      <ellipse cx="52" cy="92" rx="38" ry="6" fill="#111827" opacity="0.4"/>
+      
+      {/* Main oven body - brick construction */}
+      <rect x="18" y="25" width="64" height="60" rx="4" fill="#991B1B" stroke="#7F1D1D" stroke-width="2"/>
+      <rect x="20" y="27" width="60" height="56" rx="3" fill="#DC2626"/>
+      
+      {/* Brick pattern */}
+      <rect x="22" y="30" width="56" height="8" fill="#EF4444"/>
+      <rect x="22" y="42" width="56" height="8" fill="#EF4444"/>
+      <rect x="22" y="54" width="56" height="8" fill="#EF4444"/>
+      <rect x="22" y="66" width="56" height="8" fill="#EF4444"/>
+      
+      {/* Brick divisions */}
+      <line x1="35" y1="30" x2="35" y2="38" stroke="#991B1B" stroke-width="1"/>
+      <line x1="50" y1="30" x2="50" y2="38" stroke="#991B1B" stroke-width="1"/>
+      <line x1="65" y1="30" x2="65" y2="38" stroke="#991B1B" stroke-width="1"/>
+      <line x1="42" y1="42" x2="42" y2="50" stroke="#991B1B" stroke-width="1"/>
+      <line x1="57" y1="42" x2="57" y2="50" stroke="#991B1B" stroke-width="1"/>
+      <line x1="35" y1="54" x2="35" y2="62" stroke="#991B1B" stroke-width="1"/>
+      <line x1="50" y1="54" x2="50" y2="62" stroke="#991B1B" stroke-width="1"/>
+      <line x1="65" y1="54" x2="65" y2="62" stroke="#991B1B" stroke-width="1"/>
+      <line x1="42" y1="66" x2="42" y2="74" stroke="#991B1B" stroke-width="1"/>
+      <line x1="57" y1="66" x2="57" y2="74" stroke="#991B1B" stroke-width="1"/>
+      
+      {/* Furnace chamber opening */}
+      <rect x="35" y="38" width="30" height="20" rx="3" fill="#111827" stroke="#000000" stroke-width="1.5"/>
+      <rect x="37" y="40" width="26" height="16" rx="2" fill="#1F2937"/>
+      
+      {/* Intense heat glow */}
+      <ellipse cx="50" cy="48" rx="12" ry="7" fill="#DC2626" opacity="0.9"/>
+      <ellipse cx="50" cy="47" rx="8" ry="5" fill="#EF4444"/>
+      <ellipse cx="50" cy="46" rx="5" ry="3" fill="#F97316"/>
+      <ellipse cx="50" cy="45" rx="3" ry="2" fill="#FED7AA"/>
+      
+      {/* Hot coals effect */}
+      <circle cx="45" cy="50" r="1.5" fill="#DC2626"/>
+      <circle cx="55" cy="49" r="1" fill="#EF4444"/>
+      <circle cx="50" cy="52" r="1" fill="#F97316"/>
+      
+      {/* Chimney/stack */}
+      <rect x="45" y="15" width="10" height="15" rx="2" fill="#6B7280" stroke="#4B5563" stroke-width="1.5"/>
+      <rect x="47" y="17" width="6" height="11" rx="1" fill="#9CA3AF"/>
+      
+      {/* Smoke/heat coming from chimney */}
+      <ellipse cx="50" cy="12" rx="4" ry="2" fill="#6B7280" opacity="0.4"/>
+      <ellipse cx="52" cy="8" rx="3" ry="1.5" fill="#6B7280" opacity="0.3"/>
+      <ellipse cx="48" cy="5" rx="2" ry="1" fill="#6B7280" opacity="0.2"/>
+      
+      {/* Door mechanism/latch */}
+      <rect x="68" y="45" width="8" height="6" rx="2" fill="#4B5563"/>
+      <rect x="70" y="47" width="4" height="2" rx="1" fill="#6B7280"/>
+      <circle cx="72" cy="48" r="1" fill="#374151"/>
+      
+      {/* Temperature gauge */}
+      <circle cx="25" cy="35" r="4" fill="#374151"/>
+      <circle cx="25" cy="35" r="3" fill="#1F2937"/>
+      <circle cx="25" cy="35" r="1" fill="#DC2626"/>
+      
+      {/* Base/foundation */}
+      <rect x="15" y="80" width="70" height="6" rx="3" fill="#4B5563"/>
+      <rect x="15" y="80" width="70" height="3" rx="3" fill="#6B7280"/>
+      
+      {/* Heat shimmer lines */}
+      <path d="M40 25 Q42 23 44 25" stroke="#F97316" stroke-width="0.5" opacity="0.5"/>
+      <path d="M56 25 Q58 23 60 25" stroke="#F97316" stroke-width="0.5" opacity="0.5"/>
     </svg>
   ),
   
