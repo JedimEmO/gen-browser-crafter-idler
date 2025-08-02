@@ -26,6 +26,24 @@ const InventorySlotComponent: Component<SlotProps> = (props) => {
     props.onMouseDown?.(e);
   };
 
+  const getDurabilityPercent = () => {
+    const item = props.slot?.item || props.preview?.item;
+    if (!item) return null;
+    const itemInfo = itemData[item];
+    if (!itemInfo?.isTool || !itemInfo.maxDurability) return null;
+    
+    const durability = gameState.toolDurability[item] ?? itemInfo.maxDurability;
+    return (durability / itemInfo.maxDurability) * 100;
+  };
+  
+  const getDurabilityClass = () => {
+    const percent = getDurabilityPercent();
+    if (percent === null) return '';
+    if (percent <= 20) return 'critical';
+    if (percent <= 50) return 'low';
+    return '';
+  };
+
   return (
     <div 
       class={`slot ${props.isActive ? 'active-hotbar' : ''}`}
@@ -53,6 +71,9 @@ const InventorySlotComponent: Component<SlotProps> = (props) => {
               </div>
               <Show when={count > 1}>
                 <div class={`item-count ${isPreview ? 'opacity-50' : ''}`}>{count}</div>
+              </Show>
+              <Show when={getDurabilityPercent() !== null && !isPreview}>
+                <div class={`durability-bar ${getDurabilityClass()}`} style={{ width: `${getDurabilityPercent()}%` }} />
               </Show>
             </>
           );

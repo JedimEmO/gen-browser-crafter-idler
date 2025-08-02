@@ -244,7 +244,8 @@ export function handleWorldGridClick(index: number) {
   
   // Handle tool durability
   if (usedTool) {
-    const currentDurability = gameState.toolDurability[usedTool] || 0;
+    // Initialize tool durability if not set
+    const currentDurability = gameState.toolDurability[usedTool] ?? itemData[usedTool].maxDurability!;
     const newDurability = currentDurability - 1;
     
     if (newDurability <= 0) {

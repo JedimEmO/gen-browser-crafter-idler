@@ -23,6 +23,23 @@ const HotbarSlot: Component<SlotProps> = (props) => {
     props.onMouseDown?.(e);
   };
 
+  const getDurabilityPercent = () => {
+    if (!props.slot?.item) return null;
+    const itemInfo = itemData[props.slot.item];
+    if (!itemInfo?.isTool || !itemInfo.maxDurability) return null;
+    
+    const durability = gameState.toolDurability[props.slot.item] ?? itemInfo.maxDurability;
+    return (durability / itemInfo.maxDurability) * 100;
+  };
+  
+  const getDurabilityClass = () => {
+    const percent = getDurabilityPercent();
+    if (percent === null) return '';
+    if (percent <= 20) return 'critical';
+    if (percent <= 50) return 'low';
+    return '';
+  };
+
   return (
     <div 
       class={`slot ${props.isActive ? 'active-hotbar' : ''}`}
@@ -43,6 +60,9 @@ const HotbarSlot: Component<SlotProps> = (props) => {
         </div>
         <Show when={props.slot!.count > 1}>
           <div class="item-count">{props.slot!.count}</div>
+        </Show>
+        <Show when={getDurabilityPercent() !== null}>
+          <div class={`durability-bar ${getDurabilityClass()}`} style={{ width: `${getDurabilityPercent()}%` }} />
         </Show>
       </Show>
     </div>

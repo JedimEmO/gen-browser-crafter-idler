@@ -22,8 +22,7 @@ export const Slot: Component<SlotProps> = (props) => {
     const item = itemData[props.item];
     if (!item.isTool || !item.maxDurability) return null;
     
-    const durability = gameState.toolDurability[props.item];
-    if (durability === null) return null;
+    const durability = gameState.toolDurability[props.item] ?? item.maxDurability;
     
     return (durability / item.maxDurability) * 100;
   };
