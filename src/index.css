@@ -11,8 +11,8 @@
     --bg-tertiary: #1a1a2e;
     --bg-hover: #252540;
     
-    --border-primary: #2a2a4a;
-    --border-secondary: #3a3a5a;
+    --border-primary: #1a1a2a;
+    --border-secondary: #2a2a3a;
     --border-glow: #00d9ff;
     
     --text-primary: #e8e8f0;
@@ -161,6 +161,7 @@
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 2px var(--accent-primary);
   }
+  
   
   .grid-tile {
     background: var(--bg-tertiary);

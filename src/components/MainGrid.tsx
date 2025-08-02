@@ -7,6 +7,7 @@ import { iconLibrary, PlayerIcon } from '../data/icons';
 import { handleFactoryGridClick, handleWorldGridClick } from '../systems/gridHandlers';
 import { Minimap } from './Minimap';
 import { CraftingBenchUI } from './CraftingBenchUI';
+import { Hotbar } from './Hotbar';
 
 const FactoryGrid: Component<{ onFactoryClick: (index: number) => void }> = (props) => {
   const getFactoryPlayerIndex = () => {
@@ -289,13 +290,14 @@ export const MainGrid: Component = () => {
         </div>
       </div>
       
-      <div class="flex-1 flex">
+      <div class="flex-1 flex flex-col">
         <Show when={gameState.currentView === 'explore'}>
           <div class="flex gap-4 items-start justify-center w-full">
             <div class="relative">
               <div class="grid grid-cols-10 grid-rows-10 gap-1 bg-black/30 p-2 rounded-lg" style="width: 440px; height: 440px;">
                 <WorldGrid />
               </div>
+              <Hotbar />
             </div>
             <Minimap />
           </div>
@@ -307,6 +309,7 @@ export const MainGrid: Component = () => {
               <div class="grid grid-cols-10 grid-rows-10 gap-1 bg-black/30 p-2 rounded-lg" style="width: 440px; height: 440px;">
                 <FactoryGrid onFactoryClick={handleFactoryClick} />
               </div>
+              <Hotbar />
             </div>
           </div>
         </Show>

@@ -66,6 +66,7 @@ export const MinecraftInventory: Component = () => {
   const [hoveredSlot, setHoveredSlot] = createSignal<{type: 'hotbar' | 'main', index: number, item: string} | null>(null);
   const [mousePos, setMousePos] = createSignal({ x: 0, y: 0 });
   const [distDrag, setDistDrag] = createSignal<{ active: boolean; button: 0|2; hovered: number[]; type: 'main' | 'crafting' | null; startIndex: number | null }>({ active: false, button: 0, hovered: [], type: null, startIndex: null });
+  const [lastClickTime, setLastClickTime] = createSignal<{time: number, type: string, index: number} | null>(null);
   
   // Check for matching recipes in the 2x2 crafting grid
   createEffect(() => {
@@ -165,6 +166,7 @@ export const MinecraftInventory: Component = () => {
       setMousePos({ x: e.pageX, y: e.pageY });
     }
     
+    // Normal drag distribution
     if (distDrag().active && (type === 'main' || type === 'crafting')) {
       const exists = distDrag().hovered.includes(index);
       if (!exists) {
@@ -195,6 +197,62 @@ export const MinecraftInventory: Component = () => {
     } else if (type === 'crafting') {
       slot = gameState.inventory.craftingGrid[index];
     }
+    
+    // Check for double-click on empty slot while holding an item
+    const now = Date.now();
+    const lastClick = lastClickTime();
+    if (lastClick && lastClick.type === type && lastClick.index === index && now - lastClick.time < 500 && e.button === 0) {
+      // Double-click detected on same slot
+      if (gameState.cursorItem && !slot) {
+        // Clicking empty slot while holding items - collect all of same type
+        const itemType = gameState.cursorItem.item;
+        let collected = 0;
+        const maxStack = 64;
+        const spaceAvailable = maxStack - gameState.cursorItem.count;
+        
+        if (type === 'main') {
+          for (let i = 0; i < gameState.inventory.main.length; i++) {
+            const s = gameState.inventory.main[i];
+            if (s && s.item === itemType && collected < spaceAvailable) {
+              const toTake = Math.min(s.count, spaceAvailable - collected);
+              collected += toTake;
+              
+              if (toTake === s.count) {
+                setGameState('inventory', 'main', i, null);
+              } else {
+                setGameState('inventory', 'main', i, 'count', (c) => c - toTake);
+              }
+            }
+          }
+        } else if (type === 'crafting') {
+          for (let i = 0; i < gameState.inventory.craftingGrid.length; i++) {
+            const s = gameState.inventory.craftingGrid[i];
+            if (s && s.item === itemType && collected < spaceAvailable) {
+              const toTake = Math.min(s.count, spaceAvailable - collected);
+              collected += toTake;
+              
+              if (toTake === s.count) {
+                setGameState('inventory', 'craftingGrid', i, null);
+              } else {
+                setGameState('inventory', 'craftingGrid', i, 'count', (c) => c - toTake);
+              }
+            }
+          }
+        }
+        
+        if (collected > 0) {
+          gameActions.setCursorItem({ 
+            item: gameState.cursorItem.item, 
+            count: gameState.cursorItem.count + collected 
+          });
+        }
+        
+        setLastClickTime(null); // Reset to prevent triple-click
+        return;
+      }
+    }
+    
+    setLastClickTime({ time: now, type, index });
     
     // Shift-click for quick transfer
     if (e.shiftKey && e.button === 0 && slot) {
@@ -528,12 +586,6 @@ export const MinecraftInventory: Component = () => {
     }
   };
 
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (e.key >= '1' && e.key <= '9') {
-      const slot = parseInt(e.key) - 1;
-      gameActions.setActiveHotbarSlot(slot);
-    }
-  };
 
   // Calculate preview distribution
   const getPreviewDistribution = createMemo(() => {
@@ -567,6 +619,7 @@ export const MinecraftInventory: Component = () => {
      const onUp = () => {
        const s = distDrag();
        if (!s.active) return;
+       
        const cursor = gameState.cursorItem;
        if (!cursor) { setDistDrag({ active: false, button: 0, hovered: [], type: null, startIndex: null }); return; }
        const targets = s.hovered;
@@ -690,137 +743,102 @@ export const MinecraftInventory: Component = () => {
        }
        setDistDrag({ active: false, button: 0, hovered: [], type: null, startIndex: null });
      };
-     window.addEventListener('mouseup', onUp);
-     window.addEventListener('keydown', handleKeyPress);
+     const handleMouseUp = () => onUp();
+     window.addEventListener('mouseup', handleMouseUp);
      window.addEventListener('contextmenu', (e) => e.preventDefault());
-     (window as any).__inv_onup = onUp;
+     
+     onCleanup(() => {
+       window.removeEventListener('mouseup', handleMouseUp);
+     });
    });
 
-   onCleanup(() => {
-     window.removeEventListener('mouseup', (window as any).__inv_onup);
-     window.removeEventListener('keydown', handleKeyPress);
-   });
-
-  // Get selected item from active hotbar slot
-  const getSelectedItem = () => {
-    const slot = gameState.inventory.hotbar[gameState.activeHotbarSlot];
-    return slot?.item || null;
-  };
 
   return (
-    <div class="panel flex-shrink-0" style="width: 400px;">
+    <div class="panel flex-shrink-0">
       <h2 class="panel-header">Inventory</h2>
       
-      {/* Main Inventory Grid */}
-      <div class="mb-4">
-        <div class="grid grid-cols-9 gap-1 bg-gray-900 p-2 rounded">
-          <For each={gameState.inventory.main}>
-            {(slot, index) => {
-              const preview = createMemo(() => {
-                const dist = getPreviewDistribution();
-                const s = distDrag();
-                if (s.active && s.type === 'main' && dist[index()] && !slot) {
-                  return { item: gameState.cursorItem!.item, count: dist[index()] };
-                }
-                return null;
-              });
-              
-              return (
-                <InventorySlotComponent
-                  slot={slot}
-                  index={index()}
-                  type="main"
-                  preview={preview()}
-                  onMouseDown={(e) => handleSlotMouseDown(e, 'main', index())}
-                  onMouseEnter={(e) => handleSlotMouseEnter(e, 'main', index())}
-                  onMouseMove={handleSlotMouseMove}
-                  onMouseLeave={handleSlotMouseLeave}
-                />
-              );
-            }}
-          </For>
-        </div>
-      </div>
-      
-      {/* 2x2 Crafting Grid */}
-      <div class="mb-4 border-t border-gray-700 pt-4">
-        <p class="text-xs text-gray-500 mb-2">CRAFTING</p>
-        <div class="flex gap-4">
-          <div class="grid grid-cols-2 gap-1 bg-gray-900 p-2 rounded">
-            <For each={gameState.inventory.craftingGrid}>
-              {(slot, index) => {
-                const preview = createMemo(() => {
-                  const dist = getPreviewDistribution();
-                  const s = distDrag();
-                  if (s.active && s.type === 'crafting' && dist[index()] && !slot) {
-                    return { item: gameState.cursorItem!.item, count: dist[index()] };
-                  }
-                  return null;
-                });
-                
-                return (
-                  <InventorySlotComponent
-                    slot={slot}
-                    index={index()}
-                    type="main"
-                    preview={preview()}
-                    onMouseDown={(e) => handleSlotMouseDown(e, 'crafting', index())}
-                    onMouseEnter={(e) => handleSlotMouseEnter(e, 'crafting', index())}
-                    onMouseMove={handleSlotMouseMove}
-                    onMouseLeave={handleSlotMouseLeave}
-                  />
-                );
-              }}
-            </For>
-          </div>
-          <div class="flex items-center">
-            <span class="text-gray-500 text-xl">→</span>
-          </div>
-          <div class="bg-gray-900 p-2 rounded">
-            <InventorySlotComponent
-              slot={gameState.inventory.craftingOutput}
-              index={0}
-              type="main"
-              onMouseDown={(e) => handleCraftingOutputClick(e)}
-              onMouseEnter={(e) => handleSlotMouseEnter(e, 'craftingOutput', 0)}
-              onMouseMove={handleSlotMouseMove}
-              onMouseLeave={handleSlotMouseLeave}
-            />
+      <div class="flex gap-4">
+        {/* Left side - Main Inventory Grid */}
+        <div class="flex-1">
+          <div class="mb-2">
+            <div class="grid grid-cols-9 gap-1 bg-gray-900 p-2 rounded">
+              <For each={gameState.inventory.main}>
+                {(slot, index) => {
+                  const preview = createMemo(() => {
+                    const dist = getPreviewDistribution();
+                    const s = distDrag();
+                    if (s.active && s.type === 'main' && dist[index()] && !slot) {
+                      return { item: gameState.cursorItem!.item, count: dist[index()] };
+                    }
+                    return null;
+                  });
+                  
+                  return (
+                    <InventorySlotComponent
+                      slot={slot}
+                      index={index()}
+                      type="main"
+                      preview={preview()}
+                      onMouseDown={(e) => handleSlotMouseDown(e, 'main', index())}
+                      onMouseEnter={(e) => handleSlotMouseEnter(e, 'main', index())}
+                      onMouseMove={handleSlotMouseMove}
+                      onMouseLeave={handleSlotMouseLeave}
+                    />
+                  );
+                }}
+              </For>
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Hotbar */}
-      <div class="border-t border-gray-700 pt-4">
-        <p class="text-xs text-gray-500 mb-2">HOTBAR (1-9)</p>
-        <div class="grid grid-cols-9 gap-1 bg-gray-900 p-2 rounded">
-          <For each={gameState.inventory.hotbar}>
-            {(slot, index) => (
+        
+        {/* Right side - 2x2 Crafting Grid */}
+        <div class="flex-shrink-0 border-l border-gray-700 pl-4">
+          <p class="text-xs text-gray-500 mb-2">CRAFTING</p>
+          <div class="flex flex-col gap-2">
+            <div class="grid grid-cols-2 gap-1 bg-gray-900 p-2 rounded">
+              <For each={gameState.inventory.craftingGrid}>
+                {(slot, index) => {
+                  const preview = createMemo(() => {
+                    const dist = getPreviewDistribution();
+                    const s = distDrag();
+                    if (s.active && s.type === 'crafting' && dist[index()] && !slot) {
+                      return { item: gameState.cursorItem!.item, count: dist[index()] };
+                    }
+                    return null;
+                  });
+                  
+                  return (
+                    <InventorySlotComponent
+                      slot={slot}
+                      index={index()}
+                      type="main"
+                      preview={preview()}
+                      onMouseDown={(e) => handleSlotMouseDown(e, 'crafting', index())}
+                      onMouseEnter={(e) => handleSlotMouseEnter(e, 'crafting', index())}
+                      onMouseMove={handleSlotMouseMove}
+                      onMouseLeave={handleSlotMouseLeave}
+                    />
+                  );
+                }}
+              </For>
+            </div>
+            <div class="flex items-center justify-center">
+              <span class="text-gray-500 text-xl">↓</span>
+            </div>
+            <div class="bg-gray-900 p-2 rounded flex justify-center">
               <InventorySlotComponent
-                slot={slot}
-                index={index()}
-                type="hotbar"
-                isActive={gameState.activeHotbarSlot === index()}
-                onMouseDown={(e) => handleSlotMouseDown(e, 'hotbar', index())}
-                onMouseEnter={(e) => handleSlotMouseEnter(e, 'hotbar', index())}
+                slot={gameState.inventory.craftingOutput}
+                index={0}
+                type="main"
+                onMouseDown={(e) => handleCraftingOutputClick(e)}
+                onMouseEnter={(e) => handleSlotMouseEnter(e, 'craftingOutput', 0)}
                 onMouseMove={handleSlotMouseMove}
                 onMouseLeave={handleSlotMouseLeave}
               />
-            )}
-          </For>
-        </div>
-      </div>
-      
-      
-      {/* Selected Item Display */}
-      <Show when={getSelectedItem()}>
-        <div class="mt-4 p-2 bg-gray-800 rounded">
-          <p class="text-xs text-gray-500">SELECTED:</p>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="text-sm">{itemData[getSelectedItem()!]?.name}</span>
+            </div>
           </div>
         </div>
-      </Show>
+      </div>
       
       {/* Item Tooltip */}
       <Show when={hoveredSlot()}>

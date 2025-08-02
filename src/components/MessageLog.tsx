@@ -13,9 +13,9 @@ export const MessageLog: Component = () => {
   });
   
   return (
-    <div class="panel flex-none">
+    <div class="panel flex-1 flex flex-col">
       <h2 class="panel-header">System Log</h2>
-      <div ref={containerRef} class="space-y-2 overflow-y-auto max-h-40 pr-2">
+      <div ref={containerRef} class="space-y-2 overflow-y-auto flex-1 pr-2">
         <For each={messageState.messages}>
           {(message) => (
             <div class={`message ${message.type} relative pl-4`}>

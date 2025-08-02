@@ -1,10 +1,11 @@
 import { For, Show, createSignal, createEffect, createMemo, onMount, onCleanup } from 'solid-js';
 import type { Component } from 'solid-js';
-import { gameState, gameActions } from '../stores/gameStore';
+import { gameState, gameActions, setGameState } from '../stores/gameStore';
 import { iconLibrary } from '../data/icons';
 import { recipes } from '../data/recipes';
 import type { MachineInventorySlot, CraftingBench } from '../types';
 import { RecipeBook } from './RecipeBook';
+import { PlayerInventoryGrid } from './PlayerInventoryGrid';
 
 type Props = {
   gridIndex: number;
@@ -14,6 +15,7 @@ type Props = {
 export const CraftingBenchUI: Component<Props> = (props) => {
   const [outputItem, setOutputItem] = createSignal<{ item: string; amount: number } | null>(null);
   const [distDrag, setDistDrag] = createSignal<{ active: boolean; button: 0|2; hovered: number[]; startIndex: number | null }>({ active: false, button: 0, hovered: [], startIndex: null });
+  const [lastClickTime, setLastClickTime] = createSignal<{time: number, index: number} | null>(null);
 
   const machine = () => {
     const m = gameState.factoryGrid[props.gridIndex];
@@ -65,6 +67,51 @@ export const CraftingBenchUI: Component<Props> = (props) => {
 
     const cursorItem = gameState.cursorItem;
     const slot = m.craftingGrid[index];
+    
+    // Check for double-click on empty slot while holding an item
+    const now = Date.now();
+    const lastClick = lastClickTime();
+    if (lastClick && lastClick.index === index && now - lastClick.time < 500 && e.button === 0) {
+      // Double-click detected on same slot
+      if (gameState.cursorItem && !slot) {
+        // Clicking empty slot while holding items - collect all of same type from crafting grid
+        const itemType = gameState.cursorItem.item;
+        let collected = 0;
+        const maxStack = 64;
+        const spaceAvailable = maxStack - gameState.cursorItem.count;
+        
+        for (let i = 0; i < 9; i++) {
+          const s = m.craftingGrid[i];
+          if (s && s.type === itemType && collected < spaceAvailable) {
+            const toTake = Math.min(s.count, spaceAvailable - collected);
+            collected += toTake;
+            
+            gameActions.updateMachine(props.gridIndex, (machine) => {
+              const m = machine as CraftingBench;
+              const newGrid = [...m.craftingGrid];
+              if (toTake === s.count) {
+                newGrid[i] = null;
+              } else {
+                newGrid[i] = { ...s, count: s.count - toTake };
+              }
+              return { ...m, craftingGrid: newGrid };
+            });
+          }
+        }
+        
+        if (collected > 0) {
+          gameActions.setCursorItem({ 
+            item: gameState.cursorItem.item, 
+            count: gameState.cursorItem.count + collected 
+          });
+        }
+        
+        setLastClickTime(null); // Reset to prevent triple-click
+        return;
+      }
+    }
+    
+    setLastClickTime({ time: now, index });
 
     // Shift-click for quick transfer
     if (e.shiftKey && e.button === 0 && slot) {
@@ -498,6 +545,56 @@ export const CraftingBenchUI: Component<Props> = (props) => {
                </Show>
              </div>
            </div>
+        </div>
+        
+        <div class="px-6 py-5">
+          <div class="text-xs uppercase tracking-wide text-[var(--text-secondary)] mb-3">Player Inventory</div>
+          <PlayerInventoryGrid 
+            onSlotInteraction={(type, index) => {
+              if (type === 'shift-click') {
+                // Transfer from inventory to crafting bench
+                const slot = gameState.inventory.main[index];
+                if (!slot) return;
+                
+                // Find empty slot in crafting grid
+                const m = machine();
+                if (!m) return;
+                
+                let transferred = false;
+                for (let i = 0; i < 9; i++) {
+                  if (!m.craftingGrid[i]) {
+                    gameActions.updateMachine(props.gridIndex, (machine) => {
+                      const m = machine as CraftingBench;
+                      const newGrid = [...m.craftingGrid];
+                      newGrid[i] = { type: slot.item, count: slot.count };
+                      return { ...m, craftingGrid: newGrid };
+                    });
+                    setGameState('inventory', 'main', index, null);
+                    transferred = true;
+                    break;
+                  } else if (m.craftingGrid[i]?.type === slot.item && m.craftingGrid[i]!.count < 64) {
+                    const space = 64 - m.craftingGrid[i]!.count;
+                    const toTransfer = Math.min(space, slot.count);
+                    
+                    gameActions.updateMachine(props.gridIndex, (machine) => {
+                      const m = machine as CraftingBench;
+                      const newGrid = [...m.craftingGrid];
+                      newGrid[i] = { ...newGrid[i]!, count: newGrid[i]!.count + toTransfer };
+                      return { ...m, craftingGrid: newGrid };
+                    });
+                    
+                    if (toTransfer === slot.count) {
+                      setGameState('inventory', 'main', index, null);
+                    } else {
+                      setGameState('inventory', 'main', index, 'count', (c) => c - toTransfer);
+                    }
+                    transferred = true;
+                    break;
+                  }
+                }
+              }
+            }}
+          />
         </div>
         
       </div>

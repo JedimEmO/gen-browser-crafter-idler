@@ -313,11 +313,6 @@ function processEnemyMovement() {
 let tickCounter = 0;
 
 export function startGameLoop() {
-  // Log once per second to verify 20 TPS
-  setInterval(() => {
-    console.log(`Game running at 20 TPS. Tick counter: ${tickCounter}`);
-  }, 1000);
-  
   setInterval(() => {
     tickCounter++;
     

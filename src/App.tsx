@@ -30,36 +30,26 @@ const App: Component = () => {
       <CursorItem />
       <CombatModal />
       
-      {/* Header */}
-      <header class="border-b border-gray-800 bg-black/50 backdrop-blur-sm">
-        <div class="container mx-auto px-4 py-3">
-          <h1 class="text-xl font-light tracking-wider">
-            <span class="text-cyan-400">IDLE</span>
-            <span class="text-gray-400">CRAFTER</span>
-            <span class="text-gray-600 text-sm ml-2">SINGULARITY</span>
-          </h1>
-        </div>
-      </header>
-      
       {/* Main Content */}
       <main class="flex-1 container mx-auto px-4 py-4">
         <div class="grid grid-cols-12 gap-4 h-full">
-          {/* Left Sidebar - Fixed width */}
+          {/* Left Sidebar - Machine Details with more space */}
           <div class="col-span-3 flex flex-col gap-4 h-full min-h-0">
-            <MinecraftInventory />
             <MachineDetails />
           </div>
           
-          {/* Center - Main Game View */}
-          <div class="col-span-6 flex min-h-0 flex-col">
+          {/* Center - Main Game View + Inventory */}
+          <div class="col-span-6 flex min-h-0 flex-col gap-4">
             <div class="flex-1 min-h-0">
               <MainGrid />
             </div>
-            <MessageLog />
+            <MinecraftInventory />
           </div>
           
-          {/* Right Sidebar - Recipe Book moved into Crafting UI */}
-          <div class="col-span-3 min-h-0 flex flex-col"></div>
+          {/* Right Sidebar - System Log */}
+          <div class="col-span-3 min-h-0 flex flex-col">
+            <MessageLog />
+          </div>
         </div>
       </main>
 

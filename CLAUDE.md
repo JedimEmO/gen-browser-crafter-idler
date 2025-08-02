@@ -43,10 +43,10 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Blocks all interactions during active combat
 
 ### Component Structure
-- **App.tsx** (src/App.tsx:1) - Main layout with three-column design
-  - Left: Minecraft-style inventory, machine details, and minimap (in explore mode)
-  - Center: Main game view with mode toggle (Factory/Explore)
-  - Right: Recipe book with crafting interface
+- **App.tsx** (src/App.tsx:1) - Main layout with three-column design (no header)
+  - Left: Machine details panel with expanded space for detailed information
+  - Center: Main game view with mode toggle (Factory/Explore), plus player inventory below
+  - Right: System log (MessageLog) showing game events and messages
 
 - **styles/combat.css** - Combat animation definitions
   - Attack swing animations with rotation and scale
@@ -59,17 +59,19 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Turn indicator glows
 
 - **MinecraftInventory.tsx** - Minecraft-style inventory system
-  - 9 hotbar slots + 27 main inventory slots + 4-slot 2x2 crafting grid
+  - 27 main inventory slots + 4-slot 2x2 crafting grid (hotbar moved to MainGrid)
   - Advanced drag-to-distribute system:
     - Left-click drag: Distributes entire stack evenly across slots
     - Right-click drag: Places one item per slot
     - Single clicks: Places entire stack in one slot
+    - Double-click: Collects all stacks of same item type
     - Visual previews during drag operations (semi-transparent items)
   - Shift-click for quick transfer between inventory sections
   - Right-click to split stacks
   - Automatic recipe detection for 2x2 crafting with real-time output updates
+  - Horizontally arranged with crafting grid on the right side
 
-- **MainGrid.tsx** - Dual-mode game view
+- **MainGrid.tsx** - Dual-mode game view with integrated hotbar
   - Factory mode: 10x10 grid for placing machines with player-controlled movement
     - Player avatar renders on factory grid at current position
     - WASD/arrow key movement within factory bounds (0-9)
@@ -80,6 +82,9 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Keyboard controls (WASD/arrows) for player movement (blocked during combat)
   - Visual indicators for reachable tiles (fixed to prevent wrapping)
   - Renders enemy sprites on the world grid
+  - Hotbar (9 slots) displayed directly below the grid for both modes
+    - Number keys 1-9 for quick selection
+    - Double-click to collect all stacks of same item type
 
 - **Minimap.tsx** - World navigation aid (explore mode only)
   - 7x7 chunk overview with biome colors
@@ -101,7 +106,10 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Smart output slot interactions:
     - Left-click: Pick up crafted items (stackable with cursor)
     - Shift-click: Auto-craft maximum possible quantity until materials run out or recipe changes
+    - Double-click: Collects all stacks of same item type from crafting grid
   - Integrated recipe book for pattern filling
+  - Player inventory displayed below crafting grid for easy access
+  - Shift-click transfers items between inventory and crafting grid
 
 - **CombatModal.tsx** - Turn-based combat interface
   - Full-screen modal that blocks all other interactions
@@ -185,6 +193,16 @@ When implementing new features:
 3. Process new machines in the game loop
 4. Use the existing icon system for visual consistency
 5. Maintain the chunk-based world generation approach
+
+### Visual Design and Icons
+
+When creating or updating game icons:
+- Use Claude's visual designer agent (svg-game-artist) for creating consistent SVG icons
+- All icons should use `viewBox="0 0 100 100"` for consistency
+- Follow the established color palette and style guidelines in icons.tsx
+- Icons should be simple enough to be recognizable at 32x32px display size
+- Machine icons should show functional aspects with industrial/mechanical aesthetic
+- Include appropriate shadows, highlights, and details for visual depth
 
 ### Important: Avoiding Store Mutations in Solid.js
 
