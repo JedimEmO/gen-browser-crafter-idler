@@ -3,7 +3,7 @@ import { messageActions } from '../stores/messageStore';
 import { itemData } from '../data/items';
 import { worldResourceData } from '../data/biomes';
 import { smeltingRecipes, cokeOvenRecipes } from '../data/recipes';
-import type { Furnace, CokeOven, Chest, Machine } from '../types';
+import type { Furnace, CokeOven, Chest, Machine, CraftingBench } from '../types';
 
 export function handleFactoryGridClick(index: number) {
   const currentTile = gameState.factoryGrid[index];
@@ -38,9 +38,11 @@ export function handleFactoryGridClick(index: number) {
             inputSide: 'bottom',
             outputSide: 'top',
             fuel: 0,
+            fuelBuffer: 0,
+            maxFuelBuffer: 100,
             progress: 0,
             isSmelting: false,
-            inventory: { input: null, fuel: null, output: null }
+            inventory: { input: null, output: null }
           } as Furnace;
         } else if (type === 'coke_oven') {
           newMachine = {
@@ -51,6 +53,12 @@ export function handleFactoryGridClick(index: number) {
             isProcessing: false,
             inventory: { input: null, output: null }
           } as CokeOven;
+        } else if (type === 'crafting_bench') {
+          newMachine = {
+            type: 'crafting_bench',
+            craftingGrid: Array(9).fill(null),
+            outputSlot: null
+          } as CraftingBench;
         } else {
           return;
         }
@@ -65,15 +73,11 @@ export function handleFactoryGridClick(index: number) {
       
       if (machine.type === 'furnace') {
         const furnace = machine as Furnace;
-        if (itemData[item].fuel && (!furnace.inventory.fuel || furnace.inventory.fuel.type === item)) {
+        if (itemData[item].fuel && furnace.fuelBuffer < furnace.maxFuelBuffer) {
           if (gameActions.removeFromInventory(item, 1)) {
             gameActions.updateMachine(index, (m) => {
               const f = m as Furnace;
-              if (!f.inventory.fuel) {
-                f.inventory.fuel = { type: item, count: 1 };
-              } else {
-                f.inventory.fuel.count++;
-              }
+              f.fuelBuffer = Math.min(f.fuelBuffer + (itemData[item].fuel || 0), f.maxFuelBuffer);
               return f;
             });
           }

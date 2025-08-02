@@ -25,13 +25,14 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Tracks player position both globally (chunks) and locally (within chunk)
 
 ### Game Systems
-- **gameLoop.ts** (src/systems/gameLoop.ts:1) - Processes machine operations and enemy movement every second
-  - Handles furnace smelting with internal fuel buffer system
+- **gameLoop.ts** (src/systems/gameLoop.ts:1) - Runs at 20 TPS (ticks per second) for smooth gameplay
+  - Handles furnace smelting with internal fuel buffer system (consumes 1 fuel per second)
   - Manages coke oven processing for advanced materials
   - Automatically transfers items between machines via configurable input/output sides
   - Pulls fuel from adjacent chests when buffer is low
-  - Processes enemy movement towards player in explore mode
+  - Processes enemy movement towards player in explore mode (40 tick cooldown = 2 seconds)
   - Checks for player-enemy collision to trigger combat
+  - Uses tick counter for precise timing of operations
 
 - **gridHandlers.ts** (src/systems/gridHandlers.ts:1) - Handles all grid interactions
   - Factory placement and machine interactions
@@ -56,10 +57,15 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Turn indicator glows
 
 - **MinecraftInventory.tsx** - Minecraft-style inventory system
-  - 9 hotbar slots + 27 main inventory slots
-  - Drag and drop with cursor item tracking
-  - Shift-click for quick transfer
+  - 9 hotbar slots + 27 main inventory slots + 4-slot 2x2 crafting grid
+  - Advanced drag-to-distribute system:
+    - Left-click drag: Distributes entire stack evenly across slots
+    - Right-click drag: Places one item per slot
+    - Single clicks: Places entire stack in one slot
+    - Visual previews during drag operations (semi-transparent items)
+  - Shift-click for quick transfer between inventory sections
   - Right-click to split stacks
+  - Automatic recipe detection for 2x2 crafting with real-time output updates
 
 - **MainGrid.tsx** - Dual-mode game view
   - Factory mode: 10x10 grid for placing machines
@@ -73,6 +79,22 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
   - Shows explored vs unexplored areas
   - Player position indicator and coordinates
   - Compass directions
+
+- **RecipeBook.tsx** - Interactive recipe browser and grid-filling system
+  - Displays all available recipes with material requirements
+  - Smart recipe filtering based on available materials and crafting context
+  - "Fill" button places recipe pattern directly into appropriate crafting grid
+  - Automatically detects 2x2 vs 3x3 crafting bench context
+  - Real-time material availability checking with color-coded tooltips
+
+- **CraftingBenchUI.tsx** - 3x3 crafting bench interface
+  - Full 3x3 crafting grid for complex recipes
+  - Same advanced drag-to-distribute system as inventory
+  - Visual previews during drag operations
+  - Smart output slot interactions:
+    - Left-click: Pick up crafted items (stackable with cursor)
+    - Shift-click: Auto-craft maximum possible quantity until materials run out or recipe changes
+  - Integrated recipe book for pattern filling
 
 - **CombatModal.tsx** - Turn-based combat interface
   - Full-screen modal that blocks all other interactions
@@ -100,23 +122,26 @@ IdleCrafter Singularity is a browser-based automation and exploration game built
 - **data/** directory contains game content:
   - items.ts - Item definitions with fuel values and properties
   - recipes.ts - Crafting (3x3 grid), smelting, and coke oven recipes
+    - Smelting times: iron_ore (100 ticks/5s), brick_mixture (60 ticks/3s)
+    - Coke oven times: wood to coal_coke (200 ticks/10s)
   - biomes.ts - 5 biomes with unique resource distributions and smaller biome sizes (0.3 frequency)
   - icons.tsx - SVG components for all items, player avatar, enemies (slime, goblin, wolf), and world resources
 
 ### Key Game Mechanics
-1. **Player-Centric Exploration**: Control a character avatar to explore and gather resources
-2. **Dual View System**: Switch between factory automation and world exploration
-3. **Proximity-Based Interaction**: Must be adjacent to resources/machines to interact
-4. **Fuel Buffer System**: Furnaces consume fuel items immediately into internal buffer
-5. **Machine Automation**: Configurable I/O sides for complex automation setups
-6. **Tool Durability**: Tools degrade with use and break when depleted
-7. **Procedural World**: Infinite chunk-based world with biome variation
-8. **Visual Feedback**: Selected machines highlighted, reachable tiles indicated
-9. **Enemy System**: 
-   - Enemies spawn 1-3 per chunk (slime, goblin, wolf with different stats)
-   - Enemies move towards player every 2 seconds
-   - Combat triggers immediately when player and enemy collide
-10. **Combat System**:
+1. **Game Loop**: Runs at 20 TPS (50ms per tick) for smooth gameplay
+2. **Player-Centric Exploration**: Control a character avatar to explore and gather resources
+3. **Dual View System**: Switch between factory automation and world exploration
+4. **Proximity-Based Interaction**: Must be adjacent to resources/machines to interact
+5. **Fuel Buffer System**: Furnaces consume fuel items immediately into internal buffer (1 fuel per second while smelting)
+6. **Machine Automation**: Configurable I/O sides for complex automation setups
+7. **Tool Durability**: Tools degrade with use and break when depleted
+8. **Procedural World**: Infinite chunk-based world with biome variation
+9. **Visual Feedback**: Selected machines highlighted, reachable tiles indicated
+10. **Enemy System**: 
+    - Enemies spawn 1-3 per chunk (slime, goblin, wolf with different stats)
+    - Enemies move towards player every 2 seconds (40 tick cooldown)
+    - Combat triggers immediately when player and enemy collide
+11. **Combat System**:
    - Turn-based combat in full-screen modal with extensive animations
    - Player has 100 HP, enemies vary (slime: 20 HP/5 damage, goblin: 30 HP/8 damage, wolf: 40 HP/12 damage)
    - Player actions:

@@ -155,6 +155,18 @@ export const iconLibrary: Record<string, IconComponent> = {
       <ellipse cx="50" cy="55" rx="25" ry="15" fill="#1F2937"/>
     </svg>
   ),
+  crafting_bench: () => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="30" width="60" height="40" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+      <rect x="25" y="35" width="50" height="30" fill="#A0522D"/>
+      <line x1="40" y1="35" x2="40" y2="65" stroke="#654321" stroke-width="1"/>
+      <line x1="60" y1="35" x2="60" y2="65" stroke="#654321" stroke-width="1"/>
+      <line x1="25" y1="45" x2="75" y2="45" stroke="#654321" stroke-width="1"/>
+      <line x1="25" y1="55" x2="75" y2="55" stroke="#654321" stroke-width="1"/>
+      <rect x="30" y="65" width="10" height="20" fill="#8B4513"/>
+      <rect x="60" y="65" width="10" height="20" fill="#8B4513"/>
+    </svg>
+  ),
   furnace: () => (
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="20" y="20" width="60" height="60" fill="#4B5563" stroke="#374151" stroke-width="2"/>

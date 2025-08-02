@@ -4,6 +4,7 @@ export const itemData: Record<string, ItemData> = {
   furnace: { name: 'Furnace', isMachine: true, configurable: true, inventory: { input: null, fuel: null, output: null } },
   coke_oven: { name: 'Coke Oven', isMachine: true, configurable: true, inventory: { input: null, output: null } },
   chest: { name: 'Chest', isMachine: true, inventory: {}, capacity: 16 },
+  crafting_bench: { name: 'Crafting Bench', isMachine: true },
   pickaxe: { name: 'Wooden Pickaxe', isTool: true, maxDurability: 59 }, 
   iron_pickaxe: { name: 'Iron Pickaxe', isTool: true, maxDurability: 250 },
   wrench: { name: 'Wrench', isTool: true },

@@ -1,14 +1,14 @@
-import { createSignal, onMount, Show } from 'solid-js';
+import { createSignal, onMount } from 'solid-js';
 import type { Component } from 'solid-js';
 import { MessageLog } from './components/MessageLog';
 import { MinecraftInventory } from './components/MinecraftInventory';
 import { MainGrid } from './components/MainGrid';
-import { RecipeBook } from './components/RecipeBook';
+// import { RecipeBook } from './components/RecipeBook';
 import { MachineDetails } from './components/MachineDetails';
 import { CombatModal } from './components/CombatModal';
 import { startGameLoop } from './systems/gameLoop';
 import { messageActions } from './stores/messageStore';
-import { gameState } from './stores/gameStore';
+
 import DevMenu from './components/DevMenu';
 import DragGhost from './components/DragGhost';
 import { CursorItem } from './components/CursorItem';
@@ -58,10 +58,8 @@ const App: Component = () => {
             <MessageLog />
           </div>
           
-          {/* Right Sidebar - Recipe Book */}
-          <div class="col-span-3 min-h-0 flex flex-col">
-            <RecipeBook />
-          </div>
+          {/* Right Sidebar - Recipe Book moved into Crafting UI */}
+          <div class="col-span-3 min-h-0 flex flex-col"></div>
         </div>
       </main>
 

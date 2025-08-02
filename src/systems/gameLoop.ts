@@ -1,7 +1,7 @@
 import { gameState, gameActions } from '../stores/gameStore';
 import { itemData } from '../data/items';
 import { smeltingRecipes, cokeOvenRecipes } from '../data/recipes';
-import type { Furnace, CokeOven, Chest, Machine, Direction, Enemy } from '../types';
+import type { Furnace, CokeOven, Chest, Direction } from '../types';
 
 function getTileIndexInDirection(index: number, direction: Direction): number {
   if (!direction) return -1;
@@ -87,7 +87,7 @@ function runFurnace(furnace: Furnace, index: number) {
     if (outputTile && outputTile.type === 'chest') {
       if (addToChestInventory(outputTileIndex, furnace.inventory.output.type, 1)) {
         gameActions.updateMachine(index, (m) => {
-          const f = { ...m, inventory: { ...m.inventory } } as Furnace;
+          const f = { ...m, inventory: { ...(m as Furnace).inventory } } as Furnace;
           if (f.inventory.output) {
             const newCount = f.inventory.output.count - 1;
             if (newCount <= 0) {
@@ -107,7 +107,10 @@ function runFurnace(furnace: Furnace, index: number) {
     gameActions.updateMachine(index, (m) => {
       const f = JSON.parse(JSON.stringify(m)) as Furnace;
       f.progress++;
-      f.fuelBuffer--; // Consume fuel while smelting
+      // Consume fuel only every 20 ticks (1 second)
+      if (tickCounter % 20 === 0) {
+        f.fuelBuffer--;
+      }
       const recipe = smeltingRecipes[f.smeltingItem!];
       if (f.progress >= recipe.time) {
         f.inventory.output = { type: recipe.output, count: 1 };
@@ -130,7 +133,7 @@ function runFurnace(furnace: Furnace, index: number) {
         const f = JSON.parse(JSON.stringify(m)) as Furnace;
         f.isSmelting = true;
         f.smeltingItem = itemToSmelt;
-        f.fuelBuffer--; // Consume 1 fuel per tick while smelting
+        // Don't consume fuel immediately - it will be consumed on tick intervals
         if (f.inventory.input) {
           f.inventory.input.count--;
           if (f.inventory.input.count <= 0) {
@@ -167,7 +170,7 @@ function runFurnace(furnace: Furnace, index: number) {
         for (const smeltableItem in smeltingRecipes) {
           if (takeFromChestInventory(inputTileIndex, smeltableItem, 1)) {
             gameActions.updateMachine(index, (m) => {
-              const f = { ...m, inventory: { ...m.inventory } } as Furnace;
+              const f = { ...m, inventory: { ...(m as Furnace).inventory } } as Furnace;
               f.inventory.input = { type: smeltableItem, count: 1 };
               return f;
             });
@@ -187,7 +190,7 @@ function runCokeOven(cokeOven: CokeOven, index: number) {
     if (outputTile && outputTile.type === 'chest') {
       if (addToChestInventory(outputTileIndex, cokeOven.inventory.output.type, 1)) {
         gameActions.updateMachine(index, (m) => {
-          const c = { ...m, inventory: { ...m.inventory } } as CokeOven;
+          const c = { ...m, inventory: { ...(m as CokeOven).inventory } } as CokeOven;
           if (c.inventory.output) {
             const newCount = c.inventory.output.count - 1;
             if (newCount <= 0) {
@@ -244,7 +247,7 @@ function runCokeOven(cokeOven: CokeOven, index: number) {
         for (const processableItem in cokeOvenRecipes) {
           if (takeFromChestInventory(inputTileIndex, processableItem, 1)) {
             gameActions.updateMachine(index, (m) => {
-              const c = { ...m, inventory: { ...m.inventory } } as CokeOven;
+              const c = { ...m, inventory: { ...(m as CokeOven).inventory } } as CokeOven;
               c.inventory.input = { type: processableItem, count: 1 };
               return c;
             });
@@ -301,14 +304,23 @@ function processEnemyMovement() {
       gameActions.updateChunkEnemy(chunkKey, index, {
         localX: newX,
         localY: newY,
-        moveCooldown: 2 // 2 second cooldown between moves
+        moveCooldown: 40 // 2 second cooldown between moves (40 ticks at 20 TPS)
       });
     }
   });
 }
 
+let tickCounter = 0;
+
 export function startGameLoop() {
+  // Log once per second to verify 20 TPS
   setInterval(() => {
+    console.log(`Game running at 20 TPS. Tick counter: ${tickCounter}`);
+  }, 1000);
+  
+  setInterval(() => {
+    tickCounter++;
+    
     // Process all machines in factory
     gameState.factoryGrid.forEach((tile, index) => {
       if (tile) {
@@ -322,5 +334,5 @@ export function startGameLoop() {
     
     // Process enemy movement
     processEnemyMovement();
-  }, 1000);
+  }, 50); // 20 TPS = 50ms per tick
 }

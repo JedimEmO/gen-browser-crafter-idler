@@ -1,4 +1,4 @@
-import { For, Show, onCleanup, onMount } from 'solid-js';
+import { For, Show, onCleanup, onMount, createSignal } from 'solid-js';
 import type { Component } from 'solid-js';
 import { gameState, gameActions } from '../stores/gameStore';
 import { GridTile } from './GridTile';
@@ -6,8 +6,9 @@ import { biomes } from '../data/biomes';
 import { iconLibrary, PlayerIcon } from '../data/icons';
 import { handleFactoryGridClick, handleWorldGridClick } from '../systems/gridHandlers';
 import { Minimap } from './Minimap';
+import { CraftingBenchUI } from './CraftingBenchUI';
 
-const FactoryGrid: Component = () => {
+const FactoryGrid: Component<{ onFactoryClick: (index: number) => void }> = (props) => {
   return (
     <For each={gameState.factoryGrid}>
       {(tile, index) => (
@@ -15,7 +16,7 @@ const FactoryGrid: Component = () => {
           tile={tile}
           index={index()}
           backgroundColor="var(--bg-tertiary)"
-          onClick={() => handleFactoryGridClick(index())}
+          onClick={() => props.onFactoryClick(index())}
           isSelected={gameState.selectedGridIndex === index()}
         />
       )}
@@ -109,9 +110,20 @@ const WorldGrid: Component = () => {
 };
 
 import { dragState, dragActions } from '../stores/dragStore';
-import type { Chest, Furnace, CokeOven, Machine } from '../types';
+import type { Chest, Furnace, CokeOven, Machine, CraftingBench } from '../types';
 
 export const MainGrid: Component = () => {
+  const [craftingBenchIndex, setCraftingBenchIndex] = createSignal<number | null>(null);
+
+  const handleFactoryClick = (index: number) => {
+    const machine = gameState.factoryGrid[index];
+    if (machine?.type === 'crafting_bench') {
+      setCraftingBenchIndex(index);
+    } else {
+      handleFactoryGridClick(index);
+    }
+  };
+
   onMount(() => {
     // Handle keyboard movement for explore view
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -159,6 +171,7 @@ export const MainGrid: Component = () => {
             if (type === 'chest') newMachine = { type: 'chest', inventory: Array(16).fill(null), capacity: 16 } as Chest;
             if (type === 'furnace') newMachine = { type: 'furnace', inputSide: 'bottom', outputSide: 'top', fuel: 0, fuelBuffer: 0, maxFuelBuffer: 80, progress: 0, isSmelting: false, inventory: { input: null, output: null } } as Furnace;
             if (type === 'coke_oven') newMachine = { type: 'coke_oven', inputSide: 'bottom', outputSide: 'top', progress: 0, isProcessing: false, inventory: { input: null, output: null } } as CokeOven;
+            if (type === 'crafting_bench') newMachine = { type: 'crafting_bench', craftingGrid: Array(9).fill(null), outputSlot: null } as CraftingBench;
             if (newMachine) gameActions.placeMachine(idx, newMachine);
           }
         }
@@ -212,7 +225,7 @@ export const MainGrid: Component = () => {
           <div class="flex items-center justify-center w-full">
             <div class="relative">
               <div class="grid grid-cols-10 grid-rows-10 gap-1 bg-black/30 p-2 rounded-lg" style="width: 440px; height: 440px;">
-                <FactoryGrid />
+                <FactoryGrid onFactoryClick={handleFactoryClick} />
               </div>
             </div>
           </div>
@@ -227,6 +240,13 @@ export const MainGrid: Component = () => {
             <span class="text-purple-400">{biomes[gameActions.getChunk(gameState.world.playerX, gameState.world.playerY).biome].name}</span>
           </p>
         </div>
+      </Show>
+      
+      <Show when={craftingBenchIndex() !== null}>
+        <CraftingBenchUI
+          gridIndex={craftingBenchIndex()!}
+          onClose={() => setCraftingBenchIndex(null)}
+        />
       </Show>
     </div>
   );

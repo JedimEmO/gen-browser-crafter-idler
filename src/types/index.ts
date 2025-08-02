@@ -13,6 +13,7 @@ export type Recipe = {
   shape: (string | null)[];
   output: string;
   amount: number;
+  requiresBench?: boolean;
 }
 
 export type SmeltingRecipe = {
@@ -65,7 +66,13 @@ export type Chest = {
   capacity: number;
 }
 
-export type Machine = Furnace | CokeOven | Chest;
+export type CraftingBench = {
+  type: 'crafting_bench';
+  craftingGrid: (MachineInventorySlot | null)[];
+  outputSlot: MachineInventorySlot | null;
+}
+
+export type Machine = Furnace | CokeOven | Chest | CraftingBench;
 
 export type Direction = 'top' | 'bottom' | 'left' | 'right';
 
@@ -124,6 +131,8 @@ export type GameState = {
   inventory: {
     hotbar: InventorySlot[]; // 9 slots (0-8)
     main: InventorySlot[]; // 27 slots (9-35)
+    craftingGrid: InventorySlot[]; // 4 slots (2x2)
+    craftingOutput: InventorySlot; // Output slot for 2x2 crafting
   };
   activeHotbarSlot: number; // 0-8
   cursorItem: InventorySlot; // Item being dragged

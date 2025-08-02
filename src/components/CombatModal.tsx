@@ -1,4 +1,4 @@
-import { Show, For, createSignal, createEffect } from 'solid-js';
+import { Show, For, createSignal } from 'solid-js';
 import type { Component } from 'solid-js';
 import { gameState, gameActions, setGameState } from '../stores/gameStore';
 import { iconLibrary } from '../data/icons';
@@ -71,7 +71,7 @@ export const CombatModal: Component = () => {
       gameActions.addCombatLog(`You attack for ${damage} damage!${isCritical ? ' CRITICAL HIT!' : ''}`);
       
       // Check if enemy is defeated after damage
-      if (gameState.combat.enemy && gameState.combat.enemy.hp <= 0) {
+      if (gameState.combat.enemy && gameState.combat.enemy!.hp <= 0) {
         gameActions.addCombatLog(`${gameState.combat.enemy.type} defeated!`);
         
         // Remove enemy from chunk
@@ -113,7 +113,9 @@ export const CombatModal: Component = () => {
     setTimeout(() => {
       gameActions.damagePlayer(reducedDamage);
       showDamageNumber(reducedDamage, 75, 50);
-      gameActions.addCombatLog(`${gameState.combat.enemy.type} attacks for ${reducedDamage} damage!${playerDefense() > 0 ? ` (${playerDefense()} blocked)` : ''}`);
+      if (gameState.combat.enemy) {
+        gameActions.addCombatLog(`${gameState.combat.enemy.type} attacks for ${reducedDamage} damage!${playerDefense() > 0 ? ` (${playerDefense()} blocked)` : ''}`);
+      }
       
       setIsDamaged(false);
       setScreenShake(false);

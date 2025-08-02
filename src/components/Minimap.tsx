@@ -1,7 +1,7 @@
 import { For, Show } from 'solid-js';
 import type { Component } from 'solid-js';
 import { gameState } from '../stores/gameStore';
-import { biomes } from '../data/biomes';
+
 
 const biomeColors: Record<string, string> = {
   plains: '#90EE90',      // Light green

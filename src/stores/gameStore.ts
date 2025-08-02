@@ -18,6 +18,8 @@ const initialState: GameState = {
       null
     ],
     main: Array(27).fill(null),
+    craftingGrid: Array(4).fill(null),
+    craftingOutput: null,
   },
   activeHotbarSlot: 0,
   cursorItem: null,
@@ -60,18 +62,7 @@ export const gameActions = {
   addToInventory: (item: string, amount: number): number => {
     let remaining = amount;
     
-    // First try to add to existing stacks in hotbar
-    for (let i = 0; i < 9; i++) {
-      if (remaining <= 0) break;
-      const slot = gameState.inventory.hotbar[i];
-      if (slot && slot.item === item && slot.count < 64) {
-        const canAdd = Math.min(remaining, 64 - slot.count);
-        setGameState('inventory', 'hotbar', i, 'count', (c) => c + canAdd);
-        remaining -= canAdd;
-      }
-    }
-    
-    // Then try to add to existing stacks in main inventory
+    // First try to add to existing stacks in main inventory
     for (let i = 0; i < 27; i++) {
       if (remaining <= 0) break;
       const slot = gameState.inventory.main[i];
@@ -82,22 +73,33 @@ export const gameActions = {
       }
     }
     
-    // Then add to empty slots in hotbar
+    // Then try to add to existing stacks in hotbar
     for (let i = 0; i < 9; i++) {
       if (remaining <= 0) break;
-      if (!gameState.inventory.hotbar[i]) {
-        const canAdd = Math.min(remaining, 64);
-        setGameState('inventory', 'hotbar', i, { item, count: canAdd });
+      const slot = gameState.inventory.hotbar[i];
+      if (slot && slot.item === item && slot.count < 64) {
+        const canAdd = Math.min(remaining, 64 - slot.count);
+        setGameState('inventory', 'hotbar', i, 'count', (c) => c + canAdd);
         remaining -= canAdd;
       }
     }
     
-    // Finally add to empty slots in main inventory
+    // Then add to empty slots in main inventory
     for (let i = 0; i < 27; i++) {
       if (remaining <= 0) break;
       if (!gameState.inventory.main[i]) {
         const canAdd = Math.min(remaining, 64);
         setGameState('inventory', 'main', i, { item, count: canAdd });
+        remaining -= canAdd;
+      }
+    }
+    
+    // Finally add to empty slots in hotbar
+    for (let i = 0; i < 9; i++) {
+      if (remaining <= 0) break;
+      if (!gameState.inventory.hotbar[i]) {
+        const canAdd = Math.min(remaining, 64);
+        setGameState('inventory', 'hotbar', i, { item, count: canAdd });
         remaining -= canAdd;
       }
     }
@@ -254,6 +256,11 @@ export const gameActions = {
   craft: (recipeId: string): boolean => {
     const recipe = recipes[recipeId];
     if (!recipe) return false;
+    
+    // Check if recipe requires crafting bench
+    if (recipe.requiresBench) {
+      return false; // This method only handles inventory crafting
+    }
     
     const ingredients: Record<string, number> = {};
     recipe.shape.filter(i => i).forEach(item => { 
